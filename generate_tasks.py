@@ -254,7 +254,7 @@ def parse_args(argv: Optional[List[str]] = None) -> AsyncBatchConfig:
     ap.add_argument("--test-temperature", type=float, default=0.6)
     ap.add_argument("--solution-temperature", type=float, default=1.0)
     ap.add_argument("--batch-size", type=int, default=100)
-    ap.add_argument("--max-concurrency", type=int, default=128)
+    ap.add_argument("--max-concurrency", type=int, default=1)
     ap.add_argument("--verbose", action="store_true")
     ap.add_argument("--quiet", action="store_true")
 
