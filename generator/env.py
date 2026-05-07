@@ -530,7 +530,7 @@ class InteractiveContainerEnvironment:
         """Rebuild sif from def."""
         with open(self.def_path, "r") as f:
             def_text = f.read()
-        def_text = def_text.replace("./ubuntu_22.04.sif", "/data/v-kangandhi/endless/ubuntu_22.04.sif")
+        def_text = def_text.replace("/data/v-kangandhi/endless/ubuntu_22.04.sif", "./ubuntu_22.04.sif")
         with open(self.def_path, "w") as f:
             f.write(def_text)
 
