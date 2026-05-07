@@ -1,0 +1,5 @@
+{
+    "description": "You are a script developer creating new Python utilities. Please set up a Python virtual environment using the standard library's venv module in your development folder at /home/user/devtools. The virtual environment should be created inside /home/user/devtools with the name pytools_env.  \n\nAfter successful creation, output the full, absolute path of the pytools_env directory, and nothing else, to the terminal. The automated test will check for this output format.",
+    "truth": "Before the task starts, the /home/user/devtools directory exists and is owned by the user.\n\nAfter completion:\n- A Python virtual environment exists at /home/user/devtools/pytools_env, containing (at minimum) standard venv structure:\n  - /home/user/devtools/pytools_env/bin/activate\n  - /home/user/devtools/pytools_env/bin/python\n  - /home/user/devtools/pytools_env/lib/ (containing site-packages, etc.)\n- Console output must be exactly:\n/home/user/devtools/pytools_env\n\nNo other output, messages, or additional lines are present.",
+    "name": "task_000000_c7b3cd38"
+}

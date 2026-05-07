@@ -1,0 +1,41 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create necessary directories
+    mkdir -p /home/user/mobile-pipeline/scripts
+    mkdir -p /home/user/mobile-pipeline/logs
+
+    # Create the legacy build script with executable permissions
+    cat << 'EOF' > /home/user/mobile-pipeline/scripts/build_v1.sh
+#!/bin/bash
+echo "Starting legacy build..."
+echo "Checking build dependencies..."
+# Simulate an old dependency check
+if [ -f "./legacy-dependency.txt" ]; then
+    echo "Legacy dependency found."
+else
+    echo "ERROR: legacy-dependency.txt NOT FOUND." >&2
+fi
+echo "Building application..."
+sleep 1
+echo "Build completed successfully!"
+EOF
+
+    chmod 700 /home/user/mobile-pipeline/scripts/build_v1.sh
+
+    # Make sure the legacy dependency file does NOT exist
+    rm -f /home/user/mobile-pipeline/scripts/legacy-dependency.txt
+
+    # Install python3 and pip, then install pytest (for testing)
+    apt-get update
+    apt-get install -y python3 python3-pip
+    pip3 install --no-cache-dir pytest
+
+%labels
+    Author Mobile Build Engineer
+
+%help
+    This container sets up the initial state for verifying execution and logging of a legacy mobile build script.

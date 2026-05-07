@@ -1,0 +1,25 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    # Create user home directory
+    mkdir -p /home/user
+    # Create security_notes.txt with the required content
+    cat > /home/user/security_notes.txt <<EOF
+Welcome to the security notes file.
+Password: mysecret123
+Please update by Friday.
+User password: qwerty
+End of document.
+EOF
+    # Set permissions so non-root users can read/write
+    chmod 644 /home/user/security_notes.txt
+    chmod 755 /home/user
+
+    # Install pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+%environment
+    export PATH=/usr/local/bin:/usr/bin:/bin:$PATH

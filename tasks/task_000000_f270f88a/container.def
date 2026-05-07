@@ -1,0 +1,18 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+# Create /home/user directory and set permissions
+mkdir -p /home/user
+chmod 777 /home/user
+
+# Install SQLite CLI and pip
+apt-get update
+apt-get install -y sqlite3 python3-pip
+
+# Install pytest for verification
+pip3 install pytest
+
+# Clean up apt cache
+apt-get clean
+rm -rf /var/lib/apt/lists/*

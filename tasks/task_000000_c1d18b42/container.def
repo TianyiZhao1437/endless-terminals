@@ -1,0 +1,22 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+# Create a user directory for the agent's workspace
+mkdir -p /home/user
+
+# Install Python3, venv module, pip, and other essentials
+apt-get update
+apt-get install -y python3 python3-venv python3-pip
+
+# Install pytest for testing
+python3 -m pip install --upgrade pip
+python3 -m pip install pytest
+
+# Ensure permissions are correct for /home/user
+chown -R root:root /home/user
+chmod 755 /home/user
+
+%environment
+# Set PATH so Python3 and pip are available
+export PATH=/usr/bin:$PATH

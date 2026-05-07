@@ -1,0 +1,22 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+    # Create user and home directory
+    useradd -m user
+    # Install python3, pip, and pytest
+    apt-get update
+    apt-get install -y python3 python3-pip python3-setuptools
+    pip3 install --no-cache-dir --upgrade pip
+    pip3 install --no-cache-dir pytest
+    # Ensure /home/user exists and is owned by user
+    chown -R user:user /home/user
+
+%environment
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+
+%labels
+    Author network-engineer-task
+    Description Apptainer container for network pip package troubleshooting task.
