@@ -1,0 +1,56 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create user home and appdata directories
+    mkdir -p /home/user/appdata
+
+    # Install SQLite CLI and pip
+    apt-get update
+    apt-get install -y sqlite3 python3-pip
+
+    # Install pytest (system-wide)
+    pip3 install pytest
+
+    # Create diagnostics.db with correct schema and data
+    sqlite3 /home/user/appdata/diagnostics.db <<EOF
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    email TEXT
+);
+INSERT INTO users (id, name, email) VALUES
+    (1, 'Alice', 'alice@example.com'),
+    (2, 'Bob', 'bob@example.com'),
+    (3, 'Charlie', 'charlie@site.com'),
+    (4, 'Dana', 'dana@site.com'),
+    (5, 'Eli', 'eli@site.com');
+
+CREATE TABLE logs (
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER,
+    message TEXT,
+    timestamp TEXT
+);
+INSERT INTO logs (id, user_id, message, timestamp) VALUES
+    (1, 1, 'Login success', '2024-06-01 10:13:19'),
+    (2, 2, 'Password changed', '2024-06-01 11:45:21'),
+    (3, 3, 'Login failed', '2024-06-01 12:12:01'),
+    (4, 1, 'Logout', '2024-06-01 12:14:55'),
+    (5, 2, 'Login success', '2024-06-02 09:17:07'),
+    (6, 4, 'Login success', '2024-06-02 09:22:54'),
+    (7, 5, 'Access denied', '2024-06-02 09:33:12'),
+    (8, 1, 'Login success', '2024-06-03 07:55:40'),
+    (9, 3, 'Logout', '2024-06-03 08:05:11'),
+    (10, 4, 'Login failed', '2024-06-03 08:17:28');
+EOF
+
+    # Set permissions: readable by 'user'
+    chmod 755 /home/user/appdata
+    chmod 644 /home/user/appdata/diagnostics.db
+
+%environment
+    # Ensure sqlite3 is in PATH
+    export PATH=/usr/bin:$PATH

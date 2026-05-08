@@ -1,0 +1,40 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create the build_pipeline directory with correct ownership and permissions
+    mkdir -p /home/user/build_pipeline
+    chown -R 1000:1000 /home/user
+    chmod 755 /home/user
+    chmod 755 /home/user/build_pipeline
+
+    # Create the settings.ini file with the required content
+    cat > /home/user/build_pipeline/settings.ini <<EOF
+[Release]
+version=1.2.3
+timestamp=2024-06-15
+
+[Android]
+minSdk=21
+targetSdk=33
+
+[iOS]
+exportSymbols=true
+archs=arm64
+EOF
+
+    # Set permissions so the agent (non-root) can read/write as needed
+    chmod 755 /home/user
+    chmod 755 /home/user/build_pipeline
+    chmod 644 /home/user/build_pipeline/settings.ini
+
+    # Install Python3, pip, and pytest
+    apt-get update
+    apt-get install -y python3 python3-pip
+    pip3 install --no-cache-dir pytest
+
+%labels
+    Maintainer agent-task
+    Description "Container for mobile build engineer pipeline config extraction task."

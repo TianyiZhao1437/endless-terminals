@@ -1,0 +1,52 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create the user and home directory if not already present
+    if ! id user >/dev/null 2>&1; then
+        useradd -m -s /bin/bash user
+    fi
+
+    # Make sure pip, git, and tar are installed
+    apt-get update
+    apt-get install -y python3-pip git tar
+    pip3 install --no-cache-dir pytest
+
+    # Create the backup_restore_test directory with proper permissions
+    mkdir -p /home/user/backup_restore_test
+    chown user:user /home/user/backup_restore_test
+    chmod 755 /home/user/backup_restore_test
+
+    # Prepare a minimal git repository with .git, README.md, main.py
+    WORKDIR=/tmp/repo_temp
+    mkdir -p "$WORKDIR"
+    cd "$WORKDIR"
+    git init --initial-branch=main
+    echo "This is a test README" > README.md
+    echo 'print("Hello from main.py")' > main.py
+    git add README.md main.py
+    git config user.email "test@example.com"
+    git config user.name "Test User"
+    git commit -m "Initial commit"
+
+    # Make sure permissions are correct
+    chown -R user:user "$WORKDIR"
+
+    # Create the tar archive with the required structure
+    # The archive should contain .git, README.md, main.py at top-level
+    tar cf /home/user/backup_restore_test/repo_backup.tar .git README.md main.py
+    chown user:user /home/user/backup_restore_test/repo_backup.tar
+    chmod 644 /home/user/backup_restore_test/repo_backup.tar
+
+    # Cleanup temp repo
+    rm -rf "$WORKDIR"
+
+%files
+
+%environment
+    # Don't override HOME; let Apptainer handle it.
+
+%runscript
+    exec /bin/bash "$@"

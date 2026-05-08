@@ -1,0 +1,32 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+
+    # Install pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+    # Create the workspace directory and set permissions for non-root user access
+    mkdir -p /home/user/docs_project
+    chmod 755 /home/user
+    chmod 755 /home/user/docs_project
+
+    # Create README.txt with exact content
+    cat > /home/user/docs_project/README.txt <<EOF
+Project: Linux Documentation
+Author: Alex Doe
+Version: 1.0
+EOF
+
+    # Create env_config.log containing the absolute path to README.txt
+    echo "/home/user/docs_project/README.txt" > /home/user/docs_project/env_config.log
+
+    # Ensure files are readable and writable by user (not root-only)
+    chmod 644 /home/user/docs_project/README.txt
+    chmod 644 /home/user/docs_project/env_config.log
+
+%environment
+    # No HOME override, let Apptainer handle the environment

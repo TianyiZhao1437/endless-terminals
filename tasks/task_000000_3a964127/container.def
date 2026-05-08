@@ -1,0 +1,37 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+    # Create the user and project directory
+    mkdir -p /home/user/grafana-dashboard
+
+    # Set permissions so non-root user can access and modify
+    chown -R 1000:1000 /home/user
+    chmod -R 755 /home/user
+
+    # Create VERSION file with initial contents
+    echo "1.3.2" > /home/user/grafana-dashboard/VERSION
+    chmod 644 /home/user/grafana-dashboard/VERSION
+
+    # Create CHANGELOG.md with required initial contents
+    cat <<EOF > /home/user/grafana-dashboard/CHANGELOG.md
+## [1.3.2] - 2024-05-14
+- Added new thresholds for alerting
+
+## [1.3.1] - 2024-05-07
+- Integrated dashboard with Prometheus
+
+## [1.3.0] - 2024-05-01
+- Initial dashboard setup
+EOF
+    chmod 644 /home/user/grafana-dashboard/CHANGELOG.md
+
+%labels
+    Maintainer example@example.com
+    Description "Setup for Grafana dashboard semantic version and changelog prepending task"

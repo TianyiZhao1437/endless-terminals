@@ -1,0 +1,28 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+
+    # Create user 'user' with home directory /home/user
+    useradd -m -s /bin/bash user
+
+    # Update package list and install Python3, pip, and sysbench
+    apt-get update
+    apt-get install -y python3 python3-pip sysbench
+
+    # Install pytest for the user
+    pip3 install --no-cache-dir pytest
+
+    # Ensure /home/user ownership and permissions
+    chown -R user:user /home/user
+    chmod 755 /home/user
+
+%environment
+    # No overrides needed; Apptainer will bind the correct $HOME
+
+%labels
+    Author benchmark-task
+
+%runscript
+    echo "Container ready for benchmarking ticket task."

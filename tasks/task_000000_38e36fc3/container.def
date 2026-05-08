@@ -1,0 +1,33 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    apt-get update
+    apt-get install -y python3 python3-pip
+    pip3 install --no-cache-dir pytest
+
+    # Create user and home directory if not already present
+    useradd -m user || true
+
+    # Create data directory with correct permissions
+    mkdir -p /home/user/data
+    chown user:user /home/user/data
+    chmod 777 /home/user/data
+
+    # Create server_usage.csv with the provided content
+    cat <<EOF > /home/user/data/server_usage.csv
+2024-06-04,server1,70.4,2564
+2024-06-05,server1,78.5,2048
+2024-06-04,server2,92.0,1740
+2024-06-05,server2,88.2,1820
+2024-06-04,server3,66.0,1480
+2024-06-05,server3,68.1,1620
+EOF
+    chown user:user /home/user/data/server_usage.csv
+    chmod 666 /home/user/data/server_usage.csv
+
+%labels
+    Author apptainer-task
+
+%help
+    This container provides the required initial state for the capacity planning CSV peak usage task.

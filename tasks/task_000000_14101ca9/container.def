@@ -1,0 +1,26 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+# Create user and home directory
+useradd -m -d /home/user user
+chown -R user:user /home/user
+
+# Install python3 and pip
+apt-get update
+apt-get install -y python3 python3-pip
+
+# Install pytest
+pip3 install --no-cache-dir pytest
+
+# Ensure /home/user is writable by user
+chmod 755 /home/user
+chown user:user /home/user
+
+%environment
+# Set PATH for python and pip
+export PATH=/usr/bin:$PATH
+
+%setup
+# Ensure weather_app directory does not exist before agent starts
+rm -rf /home/user/weather_app

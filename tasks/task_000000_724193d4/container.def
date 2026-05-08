@@ -1,0 +1,26 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create user
+    useradd -m -s /bin/bash user
+
+    # Install Python 3, pip, sqlite3, and pytest
+    apt-get update
+    apt-get install -y python3 python3-pip sqlite3
+    pip3 install --no-cache-dir pytest
+
+    # Ensure permissions for /home/user
+    chown -R user:user /home/user
+
+%environment
+    export PATH="/home/user/.local/bin:$PATH"
+
+%runscript
+    exec /bin/bash
+
+%labels
+    Author monitoring-specialist
+    Description "Base image for SQLite alert database and CSV export testing"

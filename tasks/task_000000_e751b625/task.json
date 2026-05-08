@@ -1,0 +1,5 @@
+{
+    "description": "You are working as a backup engineer and need to verify your backup process has the required environment variable for data integrity checks. In the directory /home/user/backup_job, there is a .env file. \n\nYour task is to display the value of the INTEGRITY_KEY variable in the .env file using a single terminal command. The .env file follows the format:\n\nKEY1=value1  \nKEY2=value2  \nINTEGRITY_KEY=your_integrity_value  \n...etc.\n\nPrint only the exact value of INTEGRITY_KEY, with no extra whitespace or newlines before or after the value. For automated verification, your output must be just the value, with no quotes, labels, or additional text.",
+    "truth": "Before the task starts:\n/home/user/backup_job/.env exists with the following example contents:\n---\nBACKUP_PATH=/mnt/backups\nINTEGRITY_KEY=abc123secure\nLAST_RUN=2024-06-17\n---\n\nAfter the agent completes the task, the only terminal output should be:\nabc123secure\n\nNo files or other directories are created, modified, or deleted by this task.",
+    "name": "task_000000_e751b625"
+}

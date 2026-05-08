@@ -1,0 +1,42 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Install pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+    # Create the directory structure for the task
+    mkdir -p /home/user/docs/config
+
+    # Create the INI file with the specified content and proper permissions
+    cat >/home/user/docs/config/settings.ini <<'EOF'
+[general]
+version=2.3
+author=Sam Doe
+
+[documentation]
+intro=Getting Started Guide
+usage=How To Use The Software
+faq=Frequently Asked Questions
+
+[network]
+port=8080
+timeout=60
+EOF
+
+    # Ensure user has write permissions to the directory and files
+    chmod 755 /home/user
+    chmod -R 755 /home/user/docs
+    chmod 644 /home/user/docs/config/settings.ini
+
+%files
+
+%environment
+
+%labels
+    Author="Apptainer/Singularity Expert"
+    Description="Container for documentation INI extraction task, with pytest installed and initial state set."

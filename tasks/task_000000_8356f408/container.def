@@ -1,0 +1,31 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+
+    # Create user 'user' with home directory /home/user
+    useradd -m -s /bin/bash user
+
+    # Create the test-environment directory as user
+    mkdir -p /home/user/test-environment
+    chown user:user /home/user/test-environment
+
+    # Create the id_rsa file with permissions 0644 and ownership user:user
+    touch /home/user/test-environment/id_rsa
+    chown user:user /home/user/test-environment/id_rsa
+    chmod 0644 /home/user/test-environment/id_rsa
+
+    # Make sure the log file does not exist
+    rm -f /home/user/fix_permissions.log
+
+    # Install pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+%files
+
+%environment
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8

@@ -1,0 +1,29 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+    # Install pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip install --no-cache-dir pytest
+
+    # Create user and pipeline directory
+    mkdir -p /home/user/pipeline
+    chown -R nobody:nogroup /home/user/pipeline
+    chmod 755 /home/user
+    chmod 777 /home/user/pipeline
+
+    # Create input.csv with required contents
+    cat > /home/user/pipeline/input.csv <<EOF
+alice,alice@example.com
+bob,
+charlie,charlie_at_example.com
+dan,dan@example.org
+EOF
+
+    # Set permissions so agent (non-root) can write to pipeline/
+    chmod 666 /home/user/pipeline/input.csv
+
+%environment
+    export PIPELINE_DIR=/home/user/pipeline

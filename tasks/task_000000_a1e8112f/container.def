@@ -1,0 +1,39 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+# Create user and home directory if not already present
+if ! id user >/dev/null 2>&1; then
+    useradd -m -d /home/user user
+fi
+
+# Ensure /home/user exists and is owned by user
+mkdir -p /home/user
+chown user:user /home/user
+
+# Create node directories
+mkdir -p /home/user/node1
+mkdir -p /home/user/node2
+mkdir -p /home/user/node3
+chown -R user:user /home/user/node1
+chown -R user:user /home/user/node2
+chown -R user:user /home/user/node3
+
+# Create config.txt files with initial content
+echo "setting=old1" > /home/user/node1/config.txt
+echo "setting=old2" > /home/user/node2/config.txt
+echo "setting=gamma" > /home/user/node3/config.txt
+
+# Ensure permissions are writable by user
+chmod 700 /home/user/node1 /home/user/node2 /home/user/node3
+chmod 600 /home/user/node1/config.txt /home/user/node2/config.txt /home/user/node3/config.txt
+chown user:user /home/user/node1/config.txt /home/user/node2/config.txt /home/user/node3/config.txt
+
+# Install pytest (ensure pip is installed)
+apt-get update
+apt-get install -y python3-pip
+pip3 install --no-cache-dir pytest
+
+%environment
+# Default environment for user
+export PATH=/usr/local/bin:/usr/bin:/bin:$PATH

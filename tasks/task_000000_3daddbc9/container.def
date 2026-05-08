@@ -1,0 +1,52 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+    apt-get update
+    apt-get install -y python3-pip patch
+    pip3 install --no-cache-dir pytest
+
+    # Create user and home dir if not already present
+    if ! id user >/dev/null 2>&1; then
+        useradd -m -s /bin/bash user
+    fi
+
+    # Make sure /home/user exists
+    mkdir -p /home/user/alerts
+    chown user:user /home/user/alerts
+    chmod 700 /home/user/alerts
+
+    # Create /home/user/alerts/rules.conf with the initial contents
+    cat > /home/user/alerts/rules.conf <<'EOF'
+[alert1]
+name: High Memory Usage
+threshold: 90
+enabled: true
+
+[alert2]
+name: High CPU Load
+threshold: 95
+enabled: false
+EOF
+
+    # Create /home/user/alerts/rules.conf.patch with the correct contents
+    cat > /home/user/alerts/rules.conf.patch <<'EOF'
+--- rules.conf	2023-06-10 10:00:00.000000000 +0000
++++ rules.conf	2023-06-10 12:00:00.000000000 +0000
+@@ -5,7 +5,8 @@
+
+ [alert2]
+ name: High CPU Load
+-threshold: 95
+-enabled: false
++threshold: 85
++enabled: true
+EOF
+
+    # Set ownership and permissions
+    chown user:user /home/user/alerts/rules.conf /home/user/alerts/rules.conf.patch
+    chmod 600 /home/user/alerts/rules.conf /home/user/alerts/rules.conf.patch
+
+%labels
+    Maintainer example@example.com

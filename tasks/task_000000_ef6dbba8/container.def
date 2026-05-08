@@ -1,0 +1,32 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+    # Create the project directory and set permissions
+    mkdir -p /home/user/project
+    chmod 755 /home/user
+    chmod 755 /home/user/project
+
+    # Create file_list.txt with exact required content
+    cat > /home/user/project/file_list.txt <<'EOF'
+# Source files list
+src/main.c
+src/utils/data.txt
+src/helpers/helper.py
+README.md
+src/helpers/helper.py
+docs/manual.md
+src/utils/math.c
+src/utils/script.sh
+EOF
+
+    chmod 644 /home/user/project/file_list.txt
+
+%labels
+    Author="Apptainer/Singularity Expert"
+    Description="Environment for Organize Project Files task. Installs pytest and sets up /home/user/project/file_list.txt with required content."

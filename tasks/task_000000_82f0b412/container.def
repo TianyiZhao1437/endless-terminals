@@ -1,0 +1,27 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    apt-get update
+    apt-get install -y python3-pip
+    pip install pytest
+
+    # Create logs directory and set permissions
+    mkdir -p /home/user/logs
+    chmod 755 /home/user
+    chmod 755 /home/user/logs
+
+    # Create dashboard_events.log with required content
+    cat > /home/user/logs/dashboard_events.log <<EOF
+[2024-05-01T12:00:00Z] SERVICE=api EVENT=restarted
+[2024-05-01T12:01:00Z] SERVICE=db EVENT=healthy
+[2024-05-01T12:02:00Z] SERVICE=api EVENT=scaling
+[2024-05-01T12:03:00Z] SERVICE=frontend EVENT=deployed
+[2024-05-01T12:04:00Z] SERVICE=db EVENT=backup
+EOF
+
+    # Ensure permissions for non-root user access
+    chmod 755 /home/user/logs/dashboard_events.log
+
+%labels
+    Maintainer observability-task

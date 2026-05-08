@@ -1,0 +1,26 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+# Create user and configs directory
+mkdir -p /home/user/configs
+
+# Create the UTF-8 encoded device_settings.conf file with required content
+cat > /home/user/configs/device_settings.conf <<EOF
+# Device Configuration
+location=São Paulo
+temperature_unit=Celsius
+EOF
+
+# Set permissions so user can read/write files and directories
+chmod 755 /home/user
+chmod 755 /home/user/configs
+chmod 644 /home/user/configs/device_settings.conf
+
+# Install pip and pytest
+apt-get update
+apt-get install -y python3-pip
+pip3 install --no-cache-dir pytest
+
+%labels
+Task: "Prepare initial state for UTF-8 to ISO-8859-1 encoding conversion of device_settings.conf"

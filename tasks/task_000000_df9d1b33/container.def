@@ -1,0 +1,25 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Install nmap and python3-pip (for pytest)
+    apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get install -y nmap python3-pip
+
+    # Ensure /home/user exists and is writable
+    mkdir -p /home/user
+    chown -R 1000:1000 /home/user
+    chmod 755 /home/user
+
+    # Install pytest for the agent (user)
+    pip3 install --no-cache-dir pytest
+
+%labels
+    Maintainer automation-specialist
+
+%help
+    Container for security scan automation task.
+    nmap and pytest are installed.
+    /home/user exists and is writable.

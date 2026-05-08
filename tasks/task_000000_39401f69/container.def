@@ -1,0 +1,30 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+    # Create user and logs directory
+    mkdir -p /home/user/logs
+    chown -R 1000:1000 /home/user
+    chmod 755 /home/user
+    chmod 755 /home/user/logs
+
+    # Create solver_usage.log with exact contents
+    cat <<EOF > /home/user/logs/solver_usage.log
+2024-06-08T15:42:13Z Gurobi success
+2024-06-08T15:50:12Z CPLEX failure
+2024-06-08T16:01:27Z Gurobi failure
+2024-06-08T16:10:05Z GLPK success
+2024-06-08T16:15:42Z CPLEX success
+2024-06-08T16:21:08Z Gurobi success
+EOF
+    chown 1000:1000 /home/user/logs/solver_usage.log
+    chmod 644 /home/user/logs/solver_usage.log
+
+%files
+
+%environment
+    export PATH=/usr/local/bin:/usr/bin:/bin:$PATH

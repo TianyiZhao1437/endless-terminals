@@ -1,0 +1,33 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create user and set up home directory
+    useradd -m -d /home/user user
+
+    # Install Python3, pip, and pytest
+    apt-get update
+    apt-get install -y python3 python3-pip
+    pip3 install --no-cache-dir pytest
+
+    # Create dataset directories
+    mkdir -p /home/user/dataset1
+    mkdir -p /home/user/dataset2
+    mkdir -p /home/user/dataset3
+
+    # Add at least one file to each dataset directory
+    touch /home/user/dataset1/file1.txt
+    touch /home/user/dataset2/file1.txt
+    touch /home/user/dataset3/file1.txt
+
+    # Make sure user owns everything in their home
+    chown -R user:user /home/user
+
+%labels
+    Author disk-benchmark-task
+
+%environment
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8

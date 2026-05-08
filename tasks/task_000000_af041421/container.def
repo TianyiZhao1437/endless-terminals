@@ -1,0 +1,36 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create /home/user directory if it doesn't exist
+    mkdir -p /home/user
+
+    # Create uptime_log.txt with correct contents and permissions
+    cat > /home/user/uptime_log.txt <<EOF
+2024-05-27 14:01:20 server01 12233
+2024-05-27 14:01:27 server02 9940
+2024-05-27 14:01:36 server03 5831
+EOF
+
+    # Ensure the file is owned by user and writable
+    chmod 644 /home/user/uptime_log.txt
+
+    # Install pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+%setup
+    # Ensure /home/user exists
+    mkdir -p ${SINGULARITY_ROOTFS}/home/user
+
+%files
+
+%environment
+    # No HOME override; let Apptainer bind host $HOME
+
+%labels
+    Author uptime-log-task
+    Description "Container for uptime log extraction task. Contains /home/user/uptime_log.txt, pytest installed."

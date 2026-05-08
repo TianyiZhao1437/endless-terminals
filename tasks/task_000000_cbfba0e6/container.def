@@ -1,0 +1,27 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    apt-get update
+    apt-get install -y python3-pip
+    pip install --no-cache-dir pytest
+
+    # Create user and home directory if not already present
+    groupadd -g 1000 user || true
+    useradd -m -u 1000 -g 1000 user || true
+
+    mkdir -p /home/user
+
+    # Set up version.txt with initial content
+    echo "1.0.2" > /home/user/version.txt
+
+    # Set up CHANGELOG.md with initial content
+    echo "## 1.0.2 - 2024-05-31\n\n- Improved username validation in user_manager.py" > /home/user/CHANGELOG.md
+
+    # Ensure permissions for non-root user
+    chown -R 1000:1000 /home/user
+    chmod 755 /home/user
+    chmod 644 /home/user/version.txt /home/user/CHANGELOG.md
+
+%labels
+    Maintainer user

@@ -1,0 +1,31 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+
+    # Ensure Python and pip are installed for pytest
+    apt-get update
+    apt-get install -y python3 python3-pip
+
+    # Install pytest
+    pip3 install --no-cache-dir pytest
+
+    # Create user 'user' with home directory /home/user if not present
+    if ! id user >/dev/null 2>&1; then
+        useradd -m -d /home/user user
+    fi
+
+    # Ensure /home/user directory exists and is owned by user
+    mkdir -p /home/user
+    chown user:user /home/user
+
+    # Create /home/user/etl_logs directory with initial permissions (not 700)
+    mkdir -p /home/user/etl_logs
+    chown user:user /home/user/etl_logs
+    chmod 770 /home/user/etl_logs
+
+%files
+
+%environment
+    export PATH=/usr/local/bin:/usr/bin:/bin:$PATH

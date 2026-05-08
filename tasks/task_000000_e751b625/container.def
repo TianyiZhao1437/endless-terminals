@@ -1,0 +1,27 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+    # Create user and home directory if not already present
+    useradd -m user || true
+
+    # Create the /home/user/backup_job directory
+    mkdir -p /home/user/backup_job
+    chown user:user /home/user/backup_job
+
+    # Create the .env file with the required contents
+    cat <<EOF > /home/user/backup_job/.env
+BACKUP_PATH=/mnt/backups
+INTEGRITY_KEY=abc123secure
+LAST_RUN=2024-06-17
+EOF
+
+    chown user:user /home/user/backup_job/.env
+    chmod 644 /home/user/backup_job/.env
+
+%labels
+    Maintainer backup-engineer-task

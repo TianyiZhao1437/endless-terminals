@@ -1,0 +1,38 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Install Python3 and pip
+    apt-get update
+    apt-get install -y python3 python3-pip
+
+    # Install pytest
+    pip3 install --no-cache-dir pytest
+
+    # Create user and home directory
+    useradd -m -d /home/user user
+
+    # Create required directories
+    mkdir -p /home/user/audit_reports
+    mkdir -p /home/user/projects
+
+    # Set up /home/user/projects contents
+    touch /home/user/projects/alpha.txt
+    touch /home/user/projects/delta.txt
+    touch /home/user/projects/gamma.md
+    mkdir -p /home/user/projects/beta
+    mkdir -p /home/user/projects/zeta
+
+    # Ensure permissions: user owns everything and has write access to audit_reports
+    chown -R user:user /home/user
+    chmod 700 /home/user
+    chmod 755 /home/user/projects
+    chmod 755 /home/user/projects/beta
+    chmod 755 /home/user/projects/zeta
+    chmod 755 /home/user/audit_reports
+
+%labels
+    Author FileAuditSetup
+    Description "Container for file/directory audit agent task with pytest installed"

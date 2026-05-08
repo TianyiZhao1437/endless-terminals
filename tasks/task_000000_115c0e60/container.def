@@ -1,0 +1,15 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+    # Ensure user home exists and is writeable
+    mkdir -p /home/user
+    chown -R 1000:1000 /home/user
+    chmod 755 /home/user
+
+%environment
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8

@@ -1,0 +1,52 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+
+    # Install python3-pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+    # Create user and set up home directory if not already present
+    useradd -m -u 1000 user || true
+
+    # Prepare base directories
+    mkdir -p /home/user/artifact_repo/project_alpha
+    mkdir -p /home/user/artifact_repo/project_beta
+    mkdir -p /home/user/artifact_repo/project_gamma
+    mkdir -p /home/user/scripts
+    mkdir -p /home/user/curation_logs
+
+    # Ensure directories are owned by user and writable
+    chown -R user:user /home/user
+    chmod 755 /home/user/artifact_repo
+    chmod 755 /home/user/artifact_repo/project_alpha
+    chmod 755 /home/user/artifact_repo/project_beta
+    chmod 755 /home/user/artifact_repo/project_gamma
+    chmod 777 /home/user/scripts
+    chmod 777 /home/user/curation_logs
+
+    # Create non-empty files in project_alpha
+    echo "core binary" > /home/user/artifact_repo/project_alpha/core.bin
+    echo "runner executable" > /home/user/artifact_repo/project_alpha/runner.exe
+    echo "alpha readme" > /home/user/artifact_repo/project_alpha/readme.txt
+
+    # Create non-empty file in project_beta (notes.md, no .bin/.exe)
+    echo "beta notes" > /home/user/artifact_repo/project_beta/notes.md
+
+    # Create non-empty files in project_gamma
+    echo "gamma app" > /home/user/artifact_repo/project_gamma/app.exe
+    echo "gamma module" > /home/user/artifact_repo/project_gamma/module.bin
+
+    # Set permissions on all files for user
+    chown user:user /home/user/artifact_repo/project_alpha/*
+    chown user:user /home/user/artifact_repo/project_beta/*
+    chown user:user /home/user/artifact_repo/project_gamma/*
+    chmod 644 /home/user/artifact_repo/project_alpha/*
+    chmod 644 /home/user/artifact_repo/project_beta/*
+    chmod 644 /home/user/artifact_repo/project_gamma/*
+
+%labels
+    Author artifact curation setup for agent testing

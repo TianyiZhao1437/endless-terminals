@@ -1,0 +1,31 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+    # Create the user home directory if it doesn't exist
+    mkdir -p /home/user
+
+    # Create /home/user/account_emails.txt with the provided content
+    cat > /home/user/account_emails.txt <<EOF
+alice@example.com
+bob@example.net
+carol@example.org
+bob@example.net
+bob@example.net
+alice@example.com
+bob@example.net
+EOF
+
+    # Set permissions so that the agent (non-root) can read/write in /home/user
+    chmod 755 /home/user
+    chmod 644 /home/user/account_emails.txt
+
+%files
+
+%environment
+    export PATH=/usr/local/bin:/usr/bin:/bin:$PATH

@@ -1,0 +1,39 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    # Create user and home directory if not present
+    if ! id user 2>/dev/null; then
+        useradd -m -d /home/user user
+    fi
+
+    # Ensure cloud_usage directory exists with correct permissions
+    mkdir -p /home/user/cloud_usage
+    chown user:user /home/user/cloud_usage
+    chmod 755 /home/user/cloud_usage
+
+    # Create the required files with correct content and permissions
+    echo "Sample report for 2024-06-01" > /home/user/cloud_usage/report_2024-06-01.txt
+    echo "Sample report for 2024-06-02" > /home/user/cloud_usage/report_2024-06-02.txt
+    echo "date,usage" > /home/user/cloud_usage/report_2024-06-03.csv
+    echo '{"cloud":"provider","date":"2024-06-01"}' > /home/user/cloud_usage/metadata.json
+    echo "Sample report for 2024-06-04" > /home/user/cloud_usage/report_2024-06-04.txt
+    echo "# Cloud Usage Reports" > /home/user/cloud_usage/readme.md
+
+    # Set ownership and permissions for all files
+    chown user:user /home/user/cloud_usage/*
+    chmod 644 /home/user/cloud_usage/*
+
+    # Install pytest for testing
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+%setup
+    # No setup needed
+
+%environment
+    export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
+
+%runscript
+    echo "Container is ready for FinOps task."

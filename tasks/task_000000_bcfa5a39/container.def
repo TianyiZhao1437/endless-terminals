@@ -1,0 +1,51 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+
+    # Create user and docs directory
+    mkdir -p /home/user/support_docs
+    chown -R 1000:1000 /home/user
+    chmod 755 /home/user
+    chmod 755 /home/user/support_docs
+
+    # Install required packages
+    apt-get update
+    apt-get install -y python3 python3-pip nodejs npm
+
+    # Install pytest
+    pip3 install --no-cache-dir pytest
+
+    # Install markdownlint-cli globally
+    npm install -g markdownlint-cli
+
+    # Create the Markdown documentation file with correct content and permissions
+    cat > /home/user/support_docs/ticket_resolutions.md <<'EOF'
+# Password Reset
+
+Steps to resolve:
+1. Verified user identity via security questions.
+2. Used the password reset tool to issue a temporary password.
+3. Instructed user to change password upon next login.
+
+# Printer Not Connecting
+
+Steps to resolve:
+1. Confirmed printer is powered on and connected to network.
+2. Reinstalled printer drivers on the user's computer.
+3. Sent test print — successful.
+
+# VPN Configuration
+
+Steps to resolve:
+1. Provided correct VPN client download link.
+2. Guided user through installation and credential entry.
+3. Verified successful VPN connection with user.
+EOF
+
+    chown 1000:1000 /home/user/support_docs/ticket_resolutions.md
+    chmod 644 /home/user/support_docs/ticket_resolutions.md
+
+%labels
+    Author markdown-lint-task

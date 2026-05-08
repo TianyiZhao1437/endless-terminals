@@ -1,0 +1,46 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create user and home directory if not already present
+    if ! id -u user >/dev/null 2>&1; then
+        useradd -m -d /home/user user
+    fi
+
+    # Make sure /home/user exists and is owned by user
+    mkdir -p /home/user
+    chown user:user /home/user
+
+    # Create the cloud_costs directory with correct ownership
+    mkdir -p /home/user/cloud_costs
+    chown user:user /home/user/cloud_costs
+
+    # Create the monthly_report.csv file with ground truth data
+    cat > /home/user/cloud_costs/monthly_report.csv <<EOF
+date,project,service,cost
+2024-06-01,analytics,compute,24.56
+2024-06-02,storage,storage,31.22
+2024-06-03,analytics,compute,35.44
+2024-06-04,web,cdn,12.10
+2024-06-05,storage,backup,29.99
+2024-06-06,analytics,compute,40.08
+EOF
+
+    # Set permissions so user can write to cloud_costs and the CSV file
+    chown user:user /home/user/cloud_costs/monthly_report.csv
+    chmod 644 /home/user/cloud_costs/monthly_report.csv
+    chmod 755 /home/user/cloud_costs
+
+    # Install pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+%files
+
+%environment
+
+%runscript
+    exec "$@"

@@ -1,0 +1,40 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+    # Create the user and home directory if not already present
+    useradd -m -s /bin/bash user || true
+
+    # Create the archive directory and set permissions
+    mkdir -p /home/user/archive
+    chown user:user /home/user/archive
+    chmod 777 /home/user/archive
+
+    # Create the file_list.txt file with specified contents
+    cat <<EOF > /home/user/archive/file_list.txt
+data.csv
+report.pdf
+notes.txt
+data.csv
+image.jpg
+slides.pdf
+archive.zip
+notes.txt
+data.csv
+photo.jpg
+backup.zip
+EOF
+
+    chown user:user /home/user/archive/file_list.txt
+    chmod 666 /home/user/archive/file_list.txt
+
+    # Ensure the output file does NOT exist
+    rm -f /home/user/archive/extension_report.txt
+
+%labels
+    Author="Your Name"
+    Description="Container for file extension frequency summary task. Provides input file and writable archive directory."

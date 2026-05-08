@@ -1,0 +1,33 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+    # Create user and home directory if not present
+    if ! id user >/dev/null 2>&1; then
+        useradd -m -s /bin/bash user
+    fi
+
+    mkdir -p /home/user/logs
+    chown user:user /home/user/logs
+    chmod 755 /home/user
+    chmod 755 /home/user/logs
+
+    # Create /home/user/logs/app.log with the specified content
+    cat <<EOF > /home/user/logs/app.log
+[2024-06-12 15:31:10] [INFO] Application started
+[2024-06-12 15:32:54] [ERROR] Database connection failed
+[2024-06-12 15:33:02] [WARN] High memory usage
+[2024-06-12 15:34:15] [ERROR] API timeout occurred
+[2024-06-12 15:36:40] [INFO] Job completed
+[2024-06-12 15:37:22] [ERROR] Unauthorized access attempt
+EOF
+
+    chown user:user /home/user/logs/app.log
+    chmod 644 /home/user/logs/app.log
+
+%labels
+    Author="Apptainer log extraction setup"

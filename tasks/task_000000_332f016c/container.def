@@ -1,0 +1,31 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Install python3-pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+    # Create user and migration directory
+    mkdir -p /home/user/migration
+
+    # Create /home/user/migration/auth.log with specified content
+    cat > /home/user/migration/auth.log <<'EOF'
+Jun 19 09:01:32 localhost sshd[13212]: Accepted password for alice from 192.168.1.10 port 54321 ssh2
+Jun 19 09:01:33 localhost sshd[13213]: Failed password for bob from 192.168.1.20 port 43456 ssh2
+Jun 19 09:02:00 localhost sshd[13215]: Failed password for root from 192.168.1.30 port 55321 ssh2
+Jun 19 09:02:22 localhost sshd[13216]: Accepted publickey for carol from 192.168.1.11 port 34455 ssh2
+Jun 19 09:02:47 localhost sshd[13217]: Failed password for dave from 192.168.1.22 port 65500 ssh2
+EOF
+
+    # Ensure correct permissions for user access (assuming container runs as user)
+    chmod 755 /home/user
+    chmod 755 /home/user/migration
+    chmod 644 /home/user/migration/auth.log
+
+%environment
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8

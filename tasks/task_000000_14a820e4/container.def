@@ -1,0 +1,30 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+    # Create necessary directories with correct permissions
+    mkdir -p /home/user/services/configs
+    mkdir -p /home/user/services/output
+    chmod 777 /home/user/services/configs
+    chmod 777 /home/user/services/output
+
+    # Create the microservice.ini file with exact content
+    cat <<EOF > /home/user/services/configs/microservice.ini
+[service]
+name=auth
+port=8081
+
+[database]
+host=db.internal
+port=5432
+EOF
+
+    chmod 666 /home/user/services/configs/microservice.ini
+
+%labels
+    Author container-specialist
+    Description "Container with initial microservice.ini for INI audit task, pytest installed."

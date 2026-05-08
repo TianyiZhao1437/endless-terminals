@@ -1,0 +1,46 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+
+    # Install python3, pip, and pytest
+    apt-get update
+    apt-get install -y python3 python3-pip
+    pip3 install --no-cache-dir pytest
+
+    # Create user home directory if not exists
+    mkdir -p /home/user
+
+    # Create required writable directories
+    mkdir -p /home/user/csv_files
+    chmod 700 /home/user/csv_files
+
+    mkdir -p /home/user/.ssh
+    chmod 700 /home/user/.ssh
+
+    # Create the required CSV file with exact content
+    cat > /home/user/csv_files/data_raw.csv <<EOF
+id,name,status
+1,Alice,SUCCESS
+2,Bob,FAILED
+3,Charlie,SUCCESS
+4,David,PENDING
+5,Eve,SUCCESS
+EOF
+    chmod 600 /home/user/csv_files/data_raw.csv
+
+    # Ensure ownership and permissions for all user files/directories
+    chown -R root:root /home/user
+    chmod 700 /home/user/.ssh
+    chmod 700 /home/user/csv_files
+
+%setup
+    # No additional setup required
+
+%environment
+    # No environment override; Apptainer will bind the host $HOME
+
+%labels
+    Author Senior Python Engineer
+    Description Initial state for "securely transfer processed CSV files to a remote server using SSH key-based authentication" task.

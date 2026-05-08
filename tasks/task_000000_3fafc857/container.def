@@ -1,0 +1,19 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+    # Create the user and home directory if not present
+    useradd -m user || true
+    chown -R user:user /home/user
+
+%files
+
+%environment
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+
+%labels
+    Author incident-response-task

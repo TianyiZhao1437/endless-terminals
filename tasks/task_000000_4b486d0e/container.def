@@ -1,0 +1,30 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+# Create user home and translations directories
+mkdir -p /home/user/translations/es
+
+# Set permissions so agent (non-root) can write/update files
+chown -R nobody:nogroup /home/user
+chmod -R 755 /home/user
+chmod 755 /home/user/translations
+chmod 755 /home/user/translations/es
+
+# Create the initial messages.po file with required content
+cat > /home/user/translations/es/messages.po <<EOF
+msgid "welcome"
+msgstr "Saludo de prueba"
+
+msgid "exit"
+msgstr "Salir"
+EOF
+
+# Install pytest (for agent testing)
+apt-get update
+apt-get install -y python3-pip
+pip3 install pytest
+
+# Ensure permissions on messages.po for agent
+chown nobody:nogroup /home/user/translations/es/messages.po
+chmod 644 /home/user/translations/es/messages.po

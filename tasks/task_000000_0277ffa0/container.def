@@ -1,0 +1,21 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+    # Create the user and home directory if not present
+    useradd -m user || true
+
+    # Create the target config directory and ensure permissions
+    mkdir -p /home/user/db_config
+    chown user:user /home/user/db_config
+    chmod 777 /home/user/db_config
+
+%environment
+    # No environment variables set by default
+
+%runscript
+    exec bash

@@ -1,0 +1,31 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+    # Create project directory and set permissions
+    mkdir -p /home/user/myapp
+    chown -R nobody:nogroup /home/user/myapp
+    chmod 755 /home/user
+    chmod 755 /home/user/myapp
+
+    # Create VERSION file with initial content
+    echo "1.3.7" > /home/user/myapp/VERSION
+    chown nobody:nogroup /home/user/myapp/VERSION
+    chmod 644 /home/user/myapp/VERSION
+
+    # Create CHANGELOG.md with initial content
+    cat <<EOF > /home/user/myapp/CHANGELOG.md
+## [1.3.7] - 2024-06-17
+- Fixed issue with user authentication.
+- Improved documentation.
+EOF
+    chown nobody:nogroup /home/user/myapp/CHANGELOG.md
+    chmod 644 /home/user/myapp/CHANGELOG.md
+
+%labels
+    Maintainer example@example.com
+    Description "Container for semantic version bump and changelog update task."

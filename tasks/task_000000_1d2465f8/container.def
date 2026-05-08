@@ -1,0 +1,28 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+
+    # Create the user directory with appropriate permissions
+    mkdir -p /home/user
+    chmod 755 /home/user
+
+    # Install python3 and pip (needed for pytest)
+    apt-get update
+    apt-get install -y python3 python3-pip
+
+    # Install pytest
+    pip3 install --no-cache-dir pytest
+
+    # Clean up apt cache to reduce image size
+    apt-get clean
+    rm -rf /var/lib/apt/lists/*
+
+%files
+
+%environment
+    # Do not override HOME; Apptainer will set it appropriately
+
+%runscript
+    exec "$@"

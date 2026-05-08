@@ -1,0 +1,29 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Install python3 and pip for pytest
+    apt-get update
+    apt-get install -y python3 python3-pip
+
+    # Install pytest
+    pip3 install pytest
+
+    # Create the user and secure directory
+    mkdir -p /home/user/secure
+
+    # Create the credentials file with the exact required content
+    printf 'API_KEY=old_secret_key' > /home/user/secure/credentials.txt
+
+    # Set permissions so user can access and modify
+    chmod 700 /home/user/secure
+    chmod 600 /home/user/secure/credentials.txt
+    chown -R 1000:1000 /home/user
+
+%files
+
+%environment
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8

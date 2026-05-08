@@ -1,0 +1,41 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create user directory and configs directory
+    mkdir -p /home/user/configs
+
+    # Create config_v1.conf with required content
+    cat > /home/user/configs/config_v1.conf <<EOF
+server.host=localhost
+server.port=8080
+database.url=jdbc:mysql://localhost/db
+log.level=info
+EOF
+
+    # Create config_v2.conf with required content
+    cat > /home/user/configs/config_v2.conf <<EOF
+server.host=localhost
+server.port=8080
+database.url=jdbc:mysql://localhost/db
+log.level=info
+server.port=8081
+log.level=debug
+EOF
+
+    # Ensure permissions: user read/write, group and others read
+    chmod 644 /home/user/configs/config_v1.conf
+    chmod 644 /home/user/configs/config_v2.conf
+    chmod 755 /home/user/configs
+
+    # Install python3 and pip
+    apt-get update
+    apt-get install -y python3 python3-pip
+
+    # Install pytest
+    pip3 install pytest
+
+%environment
+    export PATH=/usr/local/bin:$PATH

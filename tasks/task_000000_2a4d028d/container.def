@@ -1,0 +1,31 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+    # Create the user home directory if it does not exist
+    mkdir -p /home/user
+
+    # Set up the scan_results.txt file with the required content and permissions
+    cat >/home/user/scan_results.txt <<EOF
+192.168.1.10 22
+192.168.1.12 80
+192.168.1.15 22
+192.168.1.18 443
+192.168.1.20 80
+192.168.1.21 443
+192.168.1.22 8080
+192.168.1.23 22
+192.168.1.30 80
+EOF
+
+    # Set permissions so the agent (non-root) can read/write in /home/user
+    chmod 755 /home/user
+    chmod 644 /home/user/scan_results.txt
+
+%environment
+    export PATH=/usr/local/bin:/usr/bin:/bin:$PATH

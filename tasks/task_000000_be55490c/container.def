@@ -1,0 +1,38 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    apt-get update
+    apt-get install -y python3 python3-pip
+    pip3 install pytest
+
+    # Create user and home directory
+    useradd -m user || true
+
+    # Create dev_project directory and filenames.txt file with the specified content
+    mkdir -p /home/user/dev_project
+    cat > /home/user/dev_project/filenames.txt <<EOF
+README.md
+main.py
+main.py
+test_utils.py
+test_utils.py
+test_utils.py
+README.md
+test_utils.py
+main.py
+test_utils.py
+test_utils.py
+test_utils.py
+EOF
+
+    # Ensure proper permissions for all files and directories
+    chown -R user:user /home/user
+
+%files
+
+%environment
+
+%labels
+    Author=Apptainer Task Generator
+    Description=Initial state for counting file name frequencies in a development project.

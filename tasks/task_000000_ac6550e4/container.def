@@ -1,0 +1,51 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Ensure python3, pip, and permissions utilities are available
+    apt-get update
+    apt-get install -y python3 python3-pip
+
+    # Install pytest for testing
+    pip3 install pytest
+
+    # Create the user and home directory
+    useradd -m -d /home/user user
+
+    # Create /home/user if not already present
+    mkdir -p /home/user
+    chown user:user /home/user
+    chmod 700 /home/user
+
+    # Create the CSV file with the required content
+    cat > /home/user/server_resources.csv <<EOF
+server_id,cpu_usage,memory_usage
+svr01,80.1,4094
+svr01,76.4,4097
+svr02,65.0,2048.35
+EOF
+
+    # Create the JSON summary file with the required content
+    cat > /home/user/resource_summary.json <<EOF
+{
+  "svr01": {
+    "avg_cpu_usage": 78.25,
+    "avg_memory_usage": 4095.50
+  },
+  "svr02": {
+    "avg_cpu_usage": 65.00,
+    "avg_memory_usage": 2048.35
+  }
+}
+EOF
+
+    # Set ownership and permissions so user can read/write both files
+    chown user:user /home/user/server_resources.csv
+    chown user:user /home/user/resource_summary.json
+    chmod 600 /home/user/server_resources.csv
+    chmod 600 /home/user/resource_summary.json
+
+%labels
+    Author="Capacity Planner Apptainer Setup"

@@ -1,0 +1,39 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    # Create the user home directory with correct permissions
+    mkdir -p /home/user
+    chown 1000:1000 /home/user
+
+    # Install pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+    # Ensure /etc/shadow exists and is readable by the agent (non-root)
+    # Create a minimal /etc/shadow file with at least one user with an empty password hash ("testuser")
+    # - testuser::19434:0:99999:7:::
+    # - root:*:... (locked root account for realism)
+    # - someuser:$6$hash:... (example with hashed pw)
+    echo "root:*:19434:0:99999:7:::" > /etc/shadow
+    echo "testuser::19434:0:99999:7:::" >> /etc/shadow
+    echo "someuser:\$6\$hash:19434:0:99999:7:::" >> /etc/shadow
+
+    # Set permissions so /etc/shadow is readable by the agent, but not writable
+    chmod 644 /etc/shadow
+
+    # Make sure /etc/shadow is owned by root for realism
+    chown root:root /etc/shadow
+
+%setup
+    # No setup actions needed
+
+%environment
+    # No environment overrides
+
+%files
+    # No files to copy
+
+%runscript
+    # No runscript needed

@@ -1,0 +1,35 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+# Install Python3 and pip, then pytest
+apt-get update
+apt-get install -y python3 python3-pip
+pip3 install pytest
+
+# Create user and build directories
+mkdir -p /home/user/build
+
+# Create config_android.txt encoded in ISO-8859-1 (latin1)
+cat > /home/user/build/config_android.txt <<EOF
+name=Andr\xe9
+mode=Desenvolvimento
+api=29
+EOF
+# The above uses literal \xe9 for 'é' in ISO-8859-1; ensure file is written as bytes
+python3 -c '
+with open("/home/user/build/config_android.txt", "wb") as f:
+    f.write(b"name=Andr\xe9\n")
+    f.write(b"mode=Desenvolvimento\n")
+    f.write(b"api=29\n")
+'
+
+# Set permissions so agent (non-root) can read/write/create in /home/user/build
+chmod 755 /home/user
+chmod 755 /home/user/build
+chmod 644 /home/user/build/config_android.txt
+
+%environment
+# Minimal environment: ensure locale is set for UTF-8 operations
+export LANG=C.UTF-8
+export LC_ALL=C.UTF-8

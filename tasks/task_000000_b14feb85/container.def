@@ -1,0 +1,40 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+
+    # Create user home directory structure
+    mkdir -p /home/user/cicd/configs
+
+    # Create pipeline.ini with required content and permissions
+    cat > /home/user/cicd/configs/pipeline.ini <<EOF
+[git]
+url = https://github.com/example/project.git
+branch = main
+shallow_clone = true
+
+[docker]
+image = example/project
+tag = latest
+build_args = --no-cache
+
+[notifications]
+email_on_failure = devops@example.com
+slack_webhook = https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+EOF
+
+    chmod 644 /home/user/cicd/configs/pipeline.ini
+    chown nobody:nogroup /home/user/cicd/configs/pipeline.ini || true
+
+    # Install python3 and pip
+    apt-get update
+    apt-get install -y python3 python3-pip
+
+    # Install pytest
+    pip3 install pytest
+
+%environment
+    export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8

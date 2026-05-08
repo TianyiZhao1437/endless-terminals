@@ -1,0 +1,37 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+
+    # Create user 'user' with home directory /home/user if not already present
+    if ! id user >/dev/null 2>&1; then
+        useradd -m -s /bin/bash user
+    fi
+
+    # Make sure /home/user exists and is owned by user
+    mkdir -p /home/user
+    chown user:user /home/user
+
+    # Create pipeline_util directory with correct ownership
+    mkdir -p /home/user/pipeline_util
+    chown user:user /home/user/pipeline_util
+
+    # Create numbers.txt with specified contents
+    cat > /home/user/pipeline_util/numbers.txt <<EOF
+3
+7
+notanumber
+9
+EOF
+    chown user:user /home/user/pipeline_util/numbers.txt
+
+    # Install python3 and pip for pytest
+    apt-get update
+    apt-get install -y python3 python3-pip
+
+    # Install pytest for agent tests
+    pip3 install pytest
+
+%environment
+    export PATH=/usr/local/bin:/usr/bin:/bin:$PATH

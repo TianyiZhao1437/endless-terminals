@@ -1,0 +1,30 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+    # Create user and data directory
+    mkdir -p /home/user/data
+    chown -R 1000:1000 /home/user
+
+    # Create the raw_dataset.csv with the specified content
+    cat > /home/user/data/raw_dataset.csv <<EOF
+Name,Age,Occupation
+Alice,30,Data Scientist
+Bob,,Analyst
+,25,Engineer
+Charlie,22,
+David,28,Developer
+EOF
+
+    # Ensure permissions so non-root user can read/write
+    chmod 755 /home/user
+    chmod 755 /home/user/data
+    chmod 644 /home/user/data/raw_dataset.csv
+
+%labels
+    Author data-science-task

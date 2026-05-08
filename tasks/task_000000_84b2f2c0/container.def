@@ -1,0 +1,34 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+    # Create user and home directory if not already present
+    if ! id -u user >/dev/null 2>&1; then
+        useradd -m -d /home/user user
+    fi
+
+    mkdir -p /home/user/network
+    cat > /home/user/network/monitor_config.ini <<'EOF'
+[network]
+interface=eth0
+gateway=192.168.59.1
+dns=8.8.8.8
+
+[alert]
+email=admin@example.com
+threshold=75
+EOF
+
+    chown -R user:user /home/user
+
+%files
+
+%environment
+
+%runscript
+exec "$@"

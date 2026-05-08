@@ -1,0 +1,27 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+    # Create the user and home directory if not already present
+    useradd -m user || true
+
+    # Ensure the logs directory exists with correct permissions
+    mkdir -p /home/user/logs
+    chown -R user:user /home/user/logs
+
+    # Create app.log and error.log with arbitrary previous contents
+    echo -e "Log started\nNew event" > /home/user/logs/app.log
+    echo -e "Errors:\nNone" > /home/user/logs/error.log
+
+    # Set permissions so user can write to the logs
+    chown user:user /home/user/logs/app.log /home/user/logs/error.log
+    chmod 644 /home/user/logs/app.log /home/user/logs/error.log
+
+%files
+
+%environment
+    export PATH=/usr/local/bin:/usr/bin:/bin:$PATH

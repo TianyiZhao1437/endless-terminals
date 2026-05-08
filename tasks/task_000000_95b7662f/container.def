@@ -1,0 +1,38 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create user and set up home directory if not present
+    if ! id -u user >/dev/null 2>&1; then
+        useradd -m -s /bin/bash user
+    fi
+
+    # Ensure /home/user/app exists and is writable by 'user'
+    mkdir -p /home/user/app
+    chown user:user /home/user/app
+    chmod 755 /home/user
+    chmod 755 /home/user/app
+
+    # Create /home/user/app/application.log with specified contents
+    cat > /home/user/app/application.log <<'EOF'
+2023-07-16 14:55:12 INFO - Starting application initialization
+2023-07-16 14:55:12 ERROR - Failed to connect to database
+2023-07-16 14:55:13 WARN - Retry connection
+2023-07-16 14:55:15 ERROR - User 'admin' authentication failed
+2023-07-16 14:56:01 INFO - Application running
+2023-07-16 14:56:05 ERROR - Timeout while waiting for response
+EOF
+
+    chown user:user /home/user/app/application.log
+    chmod 644 /home/user/app/application.log
+
+    # Install pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+%labels
+    Author="Apptainer/Singularity Expert"
+    Description="Container with app log for error extraction task and pytest installed."

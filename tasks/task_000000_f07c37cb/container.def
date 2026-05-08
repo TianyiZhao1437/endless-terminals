@@ -1,0 +1,32 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+# Create the user and home directory if not already present
+if ! id user >/dev/null 2>&1; then
+    useradd -m -d /home/user user
+fi
+
+# Ensure /home/user/monitoring exists and is empty
+MONITORING_DIR="/home/user/monitoring"
+mkdir -p "${MONITORING_DIR}"
+rm -rf "${MONITORING_DIR:?}/"*
+
+# Install Python3 venv module and pip
+apt-get update
+apt-get install -y python3 python3-venv python3-pip
+
+# Install pytest for testing
+pip3 install --no-cache-dir pytest
+
+# Set permissions for agent (non-root) use
+chown -R user:user /home/user
+
+%environment
+# No changes; Apptainer will bind $HOME
+
+%files
+# No files to copy
+
+%setup
+# No setup actions

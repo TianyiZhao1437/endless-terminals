@@ -1,0 +1,33 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+    # Create /home/user directory with appropriate permissions
+    mkdir -p /home/user
+    chmod 755 /home/user
+
+    # Make sure disk_usage.log does NOT exist
+    rm -f /home/user/disk_usage.log
+
+    # Install python3-pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+    # Ensure /home/user is owned by the default user (uid 1000 if present), else leave as root
+    if id -u 1000 >/dev/null 2>&1; then
+        chown 1000:1000 /home/user
+    fi
+
+%labels
+    Maintainer example@example.com
+    Description Container for disk usage log task with pytest installed
+
+%environment
+    # No overriding of HOME
+
+%files
+
+%runscript
+    exec "$@"

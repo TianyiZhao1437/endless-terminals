@@ -1,0 +1,41 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create user and project directories
+    mkdir -p /home/user/project
+
+    # Set permissions so agent can write/edit (non-root)
+    chown -R 1000:1000 /home/user
+    chmod -R 755 /home/user
+
+    # Create VERSION file with initial content
+    echo "2.3.4" > /home/user/project/VERSION
+    chmod 644 /home/user/project/VERSION
+    chown 1000:1000 /home/user/project/VERSION
+
+    # Create CHANGELOG.md file with initial content
+    cat > /home/user/project/CHANGELOG.md <<EOF
+## [2.3.4] - 2024-05-12
+### Fixed
+- Patched thread leak issue in data collector.
+EOF
+    chmod 644 /home/user/project/CHANGELOG.md
+    chown 1000:1000 /home/user/project/CHANGELOG.md
+
+    # Ensure version_bump.log does NOT exist
+    rm -f /home/user/project/version_bump.log
+
+    # Install pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+%labels
+    Author task-prep-bot
+    Description Apptainer container for version bump and changelog update task
+
+%environment
+    export PATH=/usr/local/bin:$PATH

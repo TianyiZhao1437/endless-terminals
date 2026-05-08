@@ -1,0 +1,40 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create user and home directory
+    useradd -m user
+    mkdir -p /home/user
+    chown user:user /home/user
+
+    # Install Python3, pip, sqlite3
+    apt-get update
+    apt-get install -y python3 python3-pip sqlite3
+
+    # Install pytest
+    pip3 install --no-cache-dir pytest
+
+    # Create the SQLite database with the required table and rows
+    su - user -c "
+        sqlite3 /home/user/workflows.db <<EOF
+        CREATE TABLE workflows (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            status TEXT NOT NULL
+        );
+        INSERT INTO workflows (id, name, status) VALUES (1, 'Email Sync', 'active');
+        INSERT INTO workflows (id, name, status) VALUES (2, 'Data Backup', 'inactive');
+        INSERT INTO workflows (id, name, status) VALUES (3, 'Slack Notification', 'active');
+        INSERT INTO workflows (id, name, status) VALUES (4, 'Server Health Check', 'completed');
+        INSERT INTO workflows (id, name, status) VALUES (5, 'FTP Transfer', 'active');
+EOF
+    "
+
+    # Ensure correct permissions for workflows.db
+    chown user:user /home/user/workflows.db
+    chmod 644 /home/user/workflows.db
+
+%environment
+    export PATH=/usr/local/bin:/usr/bin:/bin:$PATH

@@ -1,0 +1,21 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+    # Create the experiment directory with proper permissions
+    mkdir -p /home/user/experiments/exp42
+    chmod 700 /home/user/experiments
+    chmod 700 /home/user/experiments/exp42
+
+    # Create the model.bin file with exact content
+    printf "Hello, Experiment 42!\n" > /home/user/experiments/exp42/model.bin
+    chmod 600 /home/user/experiments/exp42/model.bin
+
+%labels
+    Author MLOps-Task
+    Description "Container sets up experiment artifact for SHA256 checksum integrity task with pytest installed"

@@ -1,0 +1,37 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+    apt-get update
+    apt-get install -y python3 python3-pip sqlite3
+    pip3 install --no-cache-dir pytest
+
+    # Create user home directory if not exists
+    mkdir -p /home/user
+    chown root:root /home/user
+    chmod 755 /home/user
+
+    # Create the source_docs.sqlite database with a "pages" table containing 7 rows
+    sqlite3 /home/user/source_docs.sqlite <<EOF
+CREATE TABLE pages (
+    id INTEGER PRIMARY KEY,
+    title TEXT NOT NULL
+);
+INSERT INTO pages (title) VALUES
+  ('Page 1'),
+  ('Page 2'),
+  ('Page 3'),
+  ('Page 4'),
+  ('Page 5'),
+  ('Page 6'),
+  ('Page 7');
+EOF
+
+    # Ensure correct permissions for /home/user and source_docs.sqlite
+    chmod 755 /home/user
+    chmod 644 /home/user/source_docs.sqlite
+    chown root:root /home/user/source_docs.sqlite
+
+%environment
+    export PATH=/usr/local/bin:/usr/bin:/bin

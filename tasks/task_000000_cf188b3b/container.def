@@ -1,0 +1,31 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create user and home directory
+    useradd -m -d /home/user user
+
+    # Make sure /home/user exists and is owned by user
+    mkdir -p /home/user
+    chown user:user /home/user
+
+    # Create old_api_code directory and test_api.py file
+    mkdir -p /home/user/old_api_code
+    chown user:user /home/user/old_api_code
+
+    echo 'print("API test successful. All endpoints returned 200 OK.")' > /home/user/old_api_code/test_api.py
+    chown user:user /home/user/old_api_code/test_api.py
+    chmod 644 /home/user/old_api_code/test_api.py
+
+    # Install Python and pip
+    apt-get update
+    apt-get install -y python3 python3-pip
+
+    # Install pytest for the user (system-wide, so agent can use it)
+    pip3 install pytest
+
+%environment
+    export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
+    export PYTHONPATH=

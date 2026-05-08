@@ -1,0 +1,20 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    # Create user and directory structure
+    mkdir -p /home/user/builds
+    # Create the compiled binary file with readable permissions
+    touch /home/user/builds/myapp
+    chmod 644 /home/user/builds/myapp
+    # Install Python and pytest
+    apt-get update
+    apt-get install -y python3 python3-pip
+    pip3 install pytest
+
+%labels
+    Author build-engineer
+    Description Container for compliance scanning task: contains /home/user/builds/myapp binary, echo scan tool, and pytest for testing.
+
+%runscript
+    echo "Container ready for compliance scan task."

@@ -1,0 +1,36 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    apt-get update
+    apt-get install -y python3 python3-pip sqlite3
+    pip3 install --no-cache-dir pytest
+
+    # Create the user and monitoring_app directory
+    mkdir -p /home/user/monitoring_app
+    chown -R nobody:nogroup /home/user
+    chmod -R 755 /home/user
+
+    # Create the dashboards.db SQLite database with the required table and rows
+    sqlite3 /home/user/monitoring_app/dashboards.db <<EOF
+CREATE TABLE dashboards (
+  id INTEGER PRIMARY KEY,
+  name TEXT,
+  owner TEXT
+);
+INSERT INTO dashboards (id, name, owner) VALUES (1, 'System Overview', 'alice');
+INSERT INTO dashboards (id, name, owner) VALUES (2, 'Network Traffic', 'bob');
+INSERT INTO dashboards (id, name, owner) VALUES (3, 'App Latency', 'carol');
+EOF
+
+    # Ensure user can read the database
+    chmod 644 /home/user/monitoring_app/dashboards.db
+
+%labels
+    Author example@example.com
+    Description Monitoring dashboards.db setup with pytest and sqlite3
+
+%runscript
+    exec "$@"

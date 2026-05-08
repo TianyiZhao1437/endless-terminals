@@ -1,0 +1,32 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+    apt-get update
+    apt-get install -y python3-pip
+    pip install pytest
+
+    # Create user and home directory if not present
+    if ! id -u user >/dev/null 2>&1; then
+        useradd -m -s /bin/bash user
+    fi
+
+    mkdir -p /home/user
+    chown user:user /home/user
+
+    # Create /home/user/targets.txt with exact contents
+    cat >/home/user/targets.txt <<EOF
+192.168.0.10
+192.168.0.20
+test-host.local
+EOF
+    chown user:user /home/user/targets.txt
+    chmod 644 /home/user/targets.txt
+
+%environment
+    export PATH=/home/user/.local/bin:$PATH
+
+%labels
+    Author penetration-testing-setup
+    Description "Sets up initial state for vulnerability scanning scripting task."

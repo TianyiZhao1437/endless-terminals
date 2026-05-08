@@ -1,0 +1,25 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+    # Create user and home directory if not exists
+    useradd -m -d /home/user user || true
+    mkdir -p /home/user/node1
+    mkdir -p /home/user/node2
+
+    # Create result.txt files with the correct contents
+    echo "accuracy: 0.91" > /home/user/node1/result.txt
+    echo "accuracy: 0.88" > /home/user/node2/result.txt
+
+    # Ensure permissions allow agent (non-root) to read/write as needed
+    chown -R user:user /home/user
+    chmod 755 /home/user
+    chmod 755 /home/user/node1 /home/user/node2
+    chmod 644 /home/user/node1/result.txt /home/user/node2/result.txt
+
+%labels
+    Author MLOpsExperimentSetup

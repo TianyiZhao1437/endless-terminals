@@ -1,0 +1,27 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+    apt-get update
+    apt-get install -y python3 python3-pip
+    pip3 install pytest
+    # Create user and db_logs directory
+    mkdir -p /home/user/db_logs
+    # Create slow_queries.csv with correct contents
+    cat > /home/user/db_logs/slow_queries.csv <<EOF
+query_id,query_text,execution_time_ms,timestamp
+1,SELECT * FROM users;,150,2024-06-01T12:30:01
+2,UPDATE accounts SET balance=balance-100 WHERE id=3;,723,2024-06-01T12:35:26
+3,SELECT count(*) FROM logs WHERE severity='ERROR';,87,2024-06-01T13:00:12
+4,DELETE FROM logs WHERE date < '2024-01-01';,801,2024-06-01T13:23:37
+EOF
+    # Set ownership and permissions for user-level access
+    chmod 755 /home/user
+    chmod 755 /home/user/db_logs
+    chmod 644 /home/user/db_logs/slow_queries.csv
+
+%files
+
+%environment
+    export PATH="/usr/local/bin:$PATH"

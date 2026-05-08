@@ -1,0 +1,32 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    apt-get update
+    apt-get install -y python3 python3-pip
+    pip3 install pytest
+
+    # Create the user and project directory
+    mkdir -p /home/user/old_project
+
+    # Create the run_report.py file with the specified contents
+    cat << 'EOF' > /home/user/old_project/run_report.py
+print("Starting legacy report generation...")
+# Simulate an error
+import sys
+print("Processing record 1...", file=sys.stderr)
+print("Processing record 2...")
+print("Processing record 3...", file=sys.stderr)
+print("Report completed successfully!")
+EOF
+
+    # Ensure permissions allow user to read/write/execute as needed
+    chmod 755 /home/user
+    chmod 755 /home/user/old_project
+    chmod 644 /home/user/old_project/run_report.py
+
+%labels
+    Maintainer agent
+
+%help
+    Container for validating legacy code release tasks. Contains /home/user/old_project/run_report.py.

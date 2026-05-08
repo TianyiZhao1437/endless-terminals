@@ -1,0 +1,36 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+    # Create user and home directory if not already present
+    useradd -m user || true
+
+    # Ensure /home/user/app_logs exists with correct files and sizes
+    mkdir -p /home/user/app_logs
+    chown user:user /home/user/app_logs
+
+    # Create error.log with 12288 bytes
+    dd if=/dev/zero of=/home/user/app_logs/error.log bs=12288 count=1
+    chown user:user /home/user/app_logs/error.log
+
+    # Create access.log with 20480 bytes
+    dd if=/dev/zero of=/home/user/app_logs/access.log bs=20480 count=1
+    chown user:user /home/user/app_logs/access.log
+
+    # Create debug.log with 10240 bytes
+    dd if=/dev/zero of=/home/user/app_logs/debug.log bs=10240 count=1
+    chown user:user /home/user/app_logs/debug.log
+
+%files
+
+%environment
+    export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+%runscript
+    exec "$@"

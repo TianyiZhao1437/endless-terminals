@@ -1,0 +1,30 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Install Python3, pip, and pytest
+    apt-get update
+    apt-get install -y python3 python3-pip
+    pip3 install --no-cache-dir pytest
+
+    # Create user and deployment directories
+    mkdir -p /home/user/deployments
+
+    # Create release_2.1.0 directory
+    mkdir -p /home/user/deployments/release_2.1.0
+
+    # Create an old release directory to point the symlink to
+    mkdir -p /home/user/deployments/release_2.0.5
+
+    # Create the current symlink (pointing to the old release)
+    ln -sfn release_2.0.5 /home/user/deployments/current
+
+    # Set permissions: ensure user can write within /home/user/deployments
+    chmod -R 755 /home/user
+    chown -R nobody:nogroup /home/user
+
+%labels
+    Maintainer example@example.com
+    Description "Container for symlink update CI/CD task. Prepares deployment directories and symlink for agent."

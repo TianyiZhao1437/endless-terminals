@@ -1,0 +1,24 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+# Create user directory
+mkdir -p /home/user
+chown -R root:root /home/user
+chmod 755 /home/user
+
+# Install required tools: curl, lynx, wget, python3, pip
+apt-get update
+apt-get install -y curl lynx wget python3 python3-pip
+
+# Install pytest (for test discovery)
+pip3 install --no-cache-dir pytest
+
+# Clean up apt cache to reduce image size
+apt-get clean
+rm -rf /var/lib/apt/lists/*
+
+%environment
+# Ensure locale for Python
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8

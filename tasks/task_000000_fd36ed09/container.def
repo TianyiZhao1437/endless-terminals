@@ -1,0 +1,35 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    # Create home directory structure
+    mkdir -p /home/user/scripts
+    mkdir -p /home/user/docs
+
+    # Create the legacy shell script with correct content and permissions
+    cat > /home/user/scripts/legacy_greet.sh << 'EOF'
+#!/bin/bash
+echo "Greeting from the legacy script:"
+echo "Hello, $1!"
+EOF
+
+    chmod 755 /home/user/scripts/legacy_greet.sh
+
+    # Ensure docs directory is writable by user
+    chmod 755 /home/user/docs
+
+    # Install python3 and pip, then install pytest
+    apt-get update
+    apt-get install -y python3 python3-pip
+    pip3 install pytest
+
+%setup
+    # Ensure ownership for /home/user (if user exists in base image)
+    # If not, leave as root; agent will not have root access but directory is writable
+    :
+
+%files
+    # No files to copy
+
+%environment
+    # No environment overrides

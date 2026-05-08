@@ -1,0 +1,26 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    apt-get update
+    apt-get install -y python3 python3-pip
+    pip3 install --no-cache-dir pytest
+
+    # Create the diagnostics directory and set permissions
+    mkdir -p /home/user/diagnostics
+    chmod 755 /home/user
+    chmod 755 /home/user/diagnostics
+
+    # Create the error.log file with the required contents
+    cat <<EOF > /home/user/diagnostics/error.log
+2024-06-01 08:15:23 ERROR: Disk failure detected on /dev/sda
+2024-06-01 08:16:00 INFO: System check started
+2024-06-01 09:02:11 ERROR: Connection timed out while accessing database
+2024-06-01 11:00:00 WARNING: High CPU usage detected
+EOF
+
+    chmod 644 /home/user/diagnostics/error.log
+
+%labels
+    Author="Apptainer Task Generator"
+    Description="Container for log extraction diagnostic task, with pytest and error.log prepared."

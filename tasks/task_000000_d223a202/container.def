@@ -1,0 +1,31 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+    # Create the user and log directory
+    mkdir -p /home/user/test_logs
+    chown -R 1000:1000 /home/user
+
+    # Create the test log file with exact contents
+    cat > /home/user/test_logs/test_suite.log <<EOF
+test_login: PASSED
+test_payment: FAILED
+test_logout: FAILED
+test_signup: PASSED
+EOF
+
+    # Set permissions: user read/write, group/other read
+    chmod 755 /home/user
+    chmod 755 /home/user/test_logs
+    chmod 644 /home/user/test_logs/test_suite.log
+
+%files
+
+%environment
+
+%runscript
+    exec "$@"

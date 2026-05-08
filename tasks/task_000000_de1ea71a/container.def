@@ -1,0 +1,32 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+
+    # Create user home structure
+    mkdir -p /home/user/documents
+    mkdir -p /home/user/reports
+
+    # Create the backup_list.txt file with specified content
+    cat > /home/user/documents/backup_list.txt <<EOF
+picture1.jpg
+notes.docx
+archive.tar.gz
+EOF
+
+    # Set permissions so user can read/write everything in /home/user
+    chmod -R 755 /home/user
+
+    # Install pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+%files
+
+%environment
+    # Default environment, don't override $HOME
+
+%runscript
+    exec "$@"

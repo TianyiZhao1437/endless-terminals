@@ -1,0 +1,30 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Install pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+    # Create user and home directory
+    useradd -m -d /home/user user
+
+    # Set up initial project directory and files with correct permissions
+    su - user -c "
+        mkdir -p /home/user/project_files
+        echo 'print(\"Hello, world!\")' > /home/user/project_files/main.py
+        echo '# Project README' > /home/user/project_files/README.md
+        echo 'Some notes about the project.' > /home/user/project_files/notes.txt
+    "
+
+    # Ensure correct ownership
+    chown -R user:user /home/user
+
+%files
+
+%environment
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8

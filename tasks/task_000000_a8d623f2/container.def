@@ -1,0 +1,46 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    # Create user and home directory
+    if ! id user >/dev/null 2>&1; then
+        useradd -m -d /home/user user
+    fi
+
+    # Create mlops directory structure
+    mkdir -p /home/user/mlops/artifacts/logs
+
+    # Set permissions: artifacts dir world-writable (777), logs dir default (755)
+    chmod 777 /home/user/mlops/artifacts
+    chmod 755 /home/user/mlops/artifacts/logs
+
+    # Create log files with required initial contents
+    cat > /home/user/mlops/artifacts/logs/experiment1.log <<EOF
+Run 2024-01-02 13:43:12 completed.
+Accuracy: 0.912
+API_KEY=abc123
+SECRET=supersecret
+EOF
+
+    cat > /home/user/mlops/artifacts/logs/experiment2.log <<EOF
+Run 2024-01-02 14:15:28 completed.
+Loss: 0.043
+API_KEY=xyz789
+EOF
+
+    cat > /home/user/mlops/artifacts/logs/experiment3.log <<EOF
+Run 2024-01-02 15:20:12 completed.
+Accuracy: 0.887
+Notes: learning rate changed.
+EOF
+
+    # Ensure user owns everything in their home
+    chown -R user:user /home/user/mlops
+
+    # Install pytest (and pip if not present)
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+%environment
+    export PATH=/home/user/.local/bin:$PATH

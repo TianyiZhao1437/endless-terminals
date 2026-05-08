@@ -1,0 +1,64 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+
+    # Install Python3, pip, and pytest
+    apt-get update
+    apt-get install -y python3 python3-pip locales
+    pip3 install --no-cache-dir pytest
+
+    # Ensure en_US.UTF-8 locale is generated (for Python unicode handling)
+    locale-gen en_US.UTF-8
+
+    # Create user and configs directory
+    mkdir -p /home/user/configs
+    chown -R 1000:1000 /home/user
+
+    # Create the UTF-16 LE BOM-encoded manifest file with Windows line endings
+    cat > /tmp/app-deployment.yaml <<'EOF'
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-app-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: test-app
+  template:
+    metadata:
+      labels:
+        app: test-app
+    spec:
+      containers:
+      - name: test-app-container
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80
+EOF
+
+    # Convert to Windows line endings (\r\n)
+    sed -i 's/$/\r/' /tmp/app-deployment.yaml
+
+    # Encode as UTF-16 LE with BOM
+    python3 -c '
+import sys
+with open("/tmp/app-deployment.yaml", "r", encoding="utf-8") as fin:
+    text = fin.read()
+with open("/home/user/configs/app-deployment.yaml.utf16", "wb") as fout:
+    fout.write(b"\xff\xfe")
+    fout.write(text.encode("utf-16le"))
+'
+
+    # Set correct permissions for agent (user: 1000, group: 1000, readable/writable)
+    chown 1000:1000 /home/user/configs/app-deployment.yaml.utf16
+    chmod 644 /home/user/configs/app-deployment.yaml.utf16
+    chown 1000:1000 /home/user/configs
+    chmod 755 /home/user/configs
+
+%environment
+    export LANG=en_US.UTF-8
+    export LC_ALL=en_US.UTF-8

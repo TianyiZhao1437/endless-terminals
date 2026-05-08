@@ -1,0 +1,26 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create user and home directory
+    useradd -m -d /home/user user
+
+    # Ensure /home/user/projects/support_app exists and is writable
+    mkdir -p /home/user/projects/support_app
+    chown -R user:user /home/user/projects
+    chmod -R 755 /home/user/projects
+    chmod -R 755 /home/user/projects/support_app
+
+    # Install python3, python3-venv, pip, and pytest
+    apt-get update
+    apt-get install -y python3 python3-venv python3-pip
+    pip3 install --no-cache-dir pytest
+
+%environment
+    export PATH=/usr/bin:$PATH
+
+%labels
+    Author test-task
+    Description "Setup for Python venv creation task with pytest pre-installed and writable project directory."

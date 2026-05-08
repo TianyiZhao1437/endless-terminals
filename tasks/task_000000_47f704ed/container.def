@@ -1,0 +1,27 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+# Create user and home directory
+useradd -m user
+
+# Set up the microservices directory structure
+mkdir -p /home/user/microservices/auth_service
+mkdir -p /home/user/microservices/billing_service
+mkdir -p /home/user/microservices/user_service
+
+# Optional: Add dummy files to each service directory (not required, but ensures directories are not empty)
+touch /home/user/microservices/auth_service/config.yaml
+touch /home/user/microservices/billing_service/config.yaml
+touch /home/user/microservices/user_service/config.yaml
+
+# Set permissions so the agent (non-root) can modify/delete directories
+chown -R user:user /home/user/microservices
+
+# Install pytest for testing
+apt-get update
+apt-get install -y python3-pip
+pip3 install pytest
+
+%environment
+export PATH=/usr/local/bin:$PATH

@@ -1,0 +1,38 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+
+    # Install Python3, pip, and pytest
+    apt-get update
+    apt-get install -y python3 python3-pip
+    pip3 install pytest
+
+    # Create the monitoring directory and set permissions
+    mkdir -p /home/user/monitoring
+    chown -R 1000:1000 /home/user/monitoring
+    chmod 777 /home/user/monitoring
+
+    # Create the uptime_checks.log file with the required content
+    cat <<EOF > /home/user/monitoring/uptime_checks.log
+2024-06-10 08:00:01 web01 UP
+2024-06-10 08:05:01 web02 DOWN
+2024-06-10 08:10:01 web01 DOWN
+2024-06-10 08:15:01 web03 UP
+2024-06-10 08:20:01 web01 UP
+2024-06-10 08:25:01 web02 UP
+2024-06-10 08:30:01 web03 DOWN
+2024-06-10 08:35:01 web01 DOWN
+2024-06-10 08:40:01 web03 UP
+EOF
+
+    chown 1000:1000 /home/user/monitoring/uptime_checks.log
+    chmod 666 /home/user/monitoring/uptime_checks.log
+
+    # Ensure the summary log does not exist
+    rm -f /home/user/monitoring/uptime_summary.log
+
+%labels
+    Author="Apptainer SRE Task Setup"
+    Description="Container for SRE uptime monitoring log parsing task with pytest installed and proper initial log state."

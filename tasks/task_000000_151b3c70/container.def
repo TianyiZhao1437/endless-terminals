@@ -1,0 +1,41 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+    # Create the user home directory if not present
+    mkdir -p /home/user
+
+    # Create the Prometheus dashboard JSON file with exact required content
+    cat >/home/user/prometheus_dashboard.json <<'EOF'
+{
+  "dashboard": {
+    "title": "Prometheus Metrics",
+    "panels": [
+      {
+        "type": "graph",
+        "title": "CPU Usage"
+      }
+    ]
+  }
+}
+EOF
+
+    # Create the Grafana dashboards provisioning directory
+    mkdir -p /home/user/grafana/provisioning/dashboards
+
+    # Set permissions so agent (non-root) can access/modify as required
+    chmod 755 /home/user
+    chmod 755 /home/user/grafana
+    chmod 755 /home/user/grafana/provisioning
+    chmod 755 /home/user/grafana/provisioning/dashboards
+    chmod 644 /home/user/prometheus_dashboard.json
+
+%labels
+    Maintainer example@example.com
+    Description "Container for Prometheus to Grafana dashboard copy task environment"

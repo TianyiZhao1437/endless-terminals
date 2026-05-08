@@ -1,0 +1,36 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    # Create user and directory structure
+    apt-get update
+    apt-get install -y python3 python3-pip
+    pip3 install pytest
+
+    # Ensure the user exists
+    if ! id user >/dev/null 2>&1; then
+        useradd -m -s /bin/bash user
+    fi
+
+    mkdir -p /home/user/monitoring_logs
+    chown -R user:user /home/user/monitoring_logs
+
+    # Create the app.log file with the required contents
+    cat > /home/user/monitoring_logs/app.log <<EOF
+2024-06-15 08:23:40 INFO Starting application
+2024-06-15 08:23:41 CRITICAL Database connection lost
+2024-06-15 08:24:00 ERROR Failed to load configuration file
+2024-06-15 08:25:00 INFO Application shut down
+2024-06-15 08:26:00 WARNING Low memory detected
+EOF
+
+    chown user:user /home/user/monitoring_logs/app.log
+    chmod 664 /home/user/monitoring_logs/app.log
+
+%files
+
+%environment
+    export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
+
+%runscript
+    echo "Container ready for monitoring log alert task."

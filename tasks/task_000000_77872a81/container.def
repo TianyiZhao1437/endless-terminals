@@ -1,0 +1,26 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install pytest
+
+    # Create the etl_logs directory and set proper permissions
+    mkdir -p /home/user/etl_logs
+    chmod 755 /home/user
+    chmod 755 /home/user/etl_logs
+
+    # Create the pipeline_run.log file with the specified content
+    cat > /home/user/etl_logs/pipeline_run.log << 'EOF'
+[2024-06-29T14:23:57Z] user_import - FAILED
+[2024-06-29T14:25:01Z] sales_transform - SUCCESS
+[2024-06-29T14:27:42Z] user_import - SUCCESS
+[2024-06-29T14:29:10Z] payment_load - FAILED
+[2024-06-29T14:31:10Z] product_transform - FAILED
+[2024-06-29T14:33:11Z] sales_transform - FAILED
+[2024-06-29T14:35:11Z] payment_load - SUCCESS
+EOF
+
+    # Ensure the log file is readable by the user
+    chmod 644 /home/user/etl_logs/pipeline_run.log

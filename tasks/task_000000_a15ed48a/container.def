@@ -1,0 +1,41 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create user and home directory
+    useradd -m user
+
+    # Create the logs directory and set permissions
+    install -d -m 700 /home/user/distributed_logs
+    chown user:user /home/user/distributed_logs
+
+    # Create the system-events.log file with required contents
+    cat > /home/user/distributed_logs/system-events.log <<EOF
+[2024-06-01T15:30:23Z] auth-service:REQUEST:87
+[2024-06-01T15:30:25Z] db-service:REQUEST:305
+[2024-06-01T15:31:10Z] cache-service:RESPONSE:22
+[2024-06-01T15:32:02Z] db-service:REQUEST:189
+[2024-06-01T15:32:30Z] auth-service:REQUEST:92
+EOF
+
+    # Set ownership and permissions for the log file
+    chown user:user /home/user/distributed_logs/system-events.log
+    chmod 600 /home/user/distributed_logs/system-events.log
+
+    # Update and install dependencies
+    apt-get update
+    apt-get install -y python3-pip
+
+    # Install pytest for the user
+    pip3 install pytest
+
+%files
+
+%environment
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+
+%runscript
+    exec /bin/bash

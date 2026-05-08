@@ -1,0 +1,35 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create the project directory with the correct permissions
+    mkdir -p /home/user/config-app
+    chmod 777 /home/user/config-app
+
+    # Create the VERSION file with the exact content
+    echo -n "1.4.2" > /home/user/config-app/VERSION
+    chmod 666 /home/user/config-app/VERSION
+
+    # Create the CHANGELOG.md file with the exact content
+    cat > /home/user/config-app/CHANGELOG.md <<'EOF'
+## [1.4.2] - 2024-06-10
+
+### Fixed
+- Patched vulnerability in YAML parser
+
+## [1.4.0] - 2024-05-28
+
+### Added
+- Command-line argument <code>--safe-mode</code>
+EOF
+    chmod 666 /home/user/config-app/CHANGELOG.md
+
+    # Install pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+%labels
+    Maintainer config-manager-task

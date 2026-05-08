@@ -1,0 +1,39 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+
+    # Create user and home directories
+    useradd -m -s /bin/bash user
+
+    # Create required directories
+    mkdir -p /home/user/projects/alpha_data
+    mkdir -p /home/user/projects/beta_data
+    mkdir -p /home/user/archives
+
+    # Create files with the correct content for alpha_data
+    echo "Alpha file content" > /home/user/projects/alpha_data/file_a.txt
+    echo "alpha: config" > /home/user/projects/alpha_data/config_a.yaml
+
+    # Create files with the correct content for beta_data
+    echo "Beta file content" > /home/user/projects/beta_data/file_b.txt
+    echo "beta: config" > /home/user/projects/beta_data/config_b.yaml
+
+    # Set permissions: ensure user owns all the files and directories
+    chown -R user:user /home/user/projects
+    chown -R user:user /home/user/archives
+
+    # Make sure projects and archives are writable
+    chmod -R u+rwX /home/user/projects
+    chmod -R u+rwX /home/user/archives
+
+    # Install Python and pip
+    apt-get update
+    apt-get install -y python3 python3-pip
+
+    # Install pytest for testing
+    pip3 install --no-cache-dir pytest
+
+%labels
+    Author="Backup Task Preparation"

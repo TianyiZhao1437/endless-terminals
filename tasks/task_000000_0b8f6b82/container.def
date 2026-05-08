@@ -1,0 +1,40 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    # Create user if not exists
+    if ! id user >/dev/null 2>&1; then
+        useradd -m -s /bin/bash user
+    fi
+
+    # Create logs directory and set permissions
+    mkdir -p /home/user/app/logs
+    chown user:user /home/user/app/logs
+    chmod 755 /home/user/app
+    chmod 755 /home/user/app/logs
+
+    # Create and populate app.log with required content
+    cat > /home/user/app/logs/app.log <<EOF
+[2024-05-01 12:05:21] ERROR: connection failed from 10.0.0.1
+[2024-05-01 12:10:00] INFO: user login from 192.168.1.10
+[2024-05-01 12:12:35] ERROR: timeout from 172.16.0.5
+[2024-05-01 12:12:37] ERROR: DROP from 192.168.1.10
+[2024-05-01 12:13:01] WARN: attempt from 172.16.0.5
+[2024-05-01 12:13:10] ERROR: failed auth from 10.0.0.2
+EOF
+    chown user:user /home/user/app/logs/app.log
+    chmod 664 /home/user/app/logs/app.log
+
+    # Install pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+%environment
+    # No HOME override; Apptainer will bind host $HOME
+
+%files
+    # No files to copy
+
+%runscript
+    # No runscript needed

@@ -1,0 +1,31 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Install pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+    # Create logs directory and set permissions
+    mkdir -p /home/user/logs
+    chmod 755 /home/user
+    chmod 755 /home/user/logs
+
+    # Create /home/user/logs/access.log with the required contents
+    cat > /home/user/logs/access.log <<EOF
+192.168.1.5 - - [23/Jun/2024:15:10:55 +0000] "POST /api/login HTTP/1.1" 200 342
+192.168.1.6 - - [23/Jun/2024:15:11:01 +0000] "GET /index.html HTTP/1.1" 200 5120
+192.168.1.7 - - [23/Jun/2024:15:12:22 +0000] "POST /api/data HTTP/1.1" 201 120
+192.168.1.4 - - [23/Jun/2024:15:12:50 +0000] "HEAD /status HTTP/1.1" 200 0
+192.168.1.8 - - [23/Jun/2024:15:13:00 +0000] "GET /about HTTP/1.1" 404 234
+EOF
+
+    # Ensure permissions: readable by user, not world-writable
+    chmod 644 /home/user/logs/access.log
+
+%labels
+    Author apptainer-task
+    Description 'Apptainer container for web developer HTTP POST log filtering task.'

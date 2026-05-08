@@ -1,0 +1,18 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+    # Create user and set up home directory
+    useradd -m user
+    # Install pip and pytest dependencies
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+%environment
+    export PATH=/home/user/.local/bin:$PATH
+
+%labels
+    Author iot-edge-engineer
+    Description "Container for IoT sensor agent pull logging task with pytest installed."

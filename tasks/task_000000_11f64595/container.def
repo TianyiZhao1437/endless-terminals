@@ -1,0 +1,35 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+# Create user and directory structure
+mkdir -p /home/user/cert_logs
+
+# Create cert_activity_01.log with required contents
+cat > /home/user/cert_logs/cert_activity_01.log <<EOF
+2024-06-01T10:12:54Z alice self-signed
+2024-06-01T11:30:02Z carol ca-signed
+2024-06-02T08:07:23Z bob self-signed
+EOF
+
+# Create cert_activity_02.log with required contents
+cat > /home/user/cert_logs/cert_activity_02.log <<EOF
+2024-06-03T12:04:12Z eve self-signed
+2024-06-02T13:15:58Z dan ca-signed
+2024-06-02T20:09:40Z frank self-signed
+EOF
+
+# Set permissions so user can read/write as non-root
+chown -R nobody:nogroup /home/user/cert_logs
+chmod 755 /home/user
+chmod 755 /home/user/cert_logs
+chmod 644 /home/user/cert_logs/cert_activity_01.log
+chmod 644 /home/user/cert_logs/cert_activity_02.log
+
+# Install pip and pytest
+apt-get update
+apt-get install -y python3-pip
+pip3 install --no-cache-dir pytest
+
+%environment
+export PATH=/usr/local/bin:$PATH

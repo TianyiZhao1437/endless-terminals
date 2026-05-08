@@ -1,0 +1,35 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Install pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+    # Create the required directories
+    mkdir -p /home/user/project/config
+    mkdir -p /home/user/project/docs
+
+    # Create the INI file with the exact contents
+    cat > /home/user/project/config/settings.ini <<'EOF'
+[General]
+app_name = ExampleApp
+version = 1.0.0
+maintainer = Alice Smith
+
+[Features]
+feature_x_enabled = true
+color_scheme = dark
+autosave = yes
+EOF
+
+    # Set permissions: ensure docs dir is writeable by non-root user
+    chmod 777 /home/user/project/docs
+    chmod 755 /home/user/project/config
+    chmod 644 /home/user/project/config/settings.ini
+
+%labels
+    Maintainer your_name

@@ -1,0 +1,32 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create the user and devserver directories
+    mkdir -p /home/user/devserver
+
+    # Create the error.log file with the specified content
+    cat > /home/user/devserver/error.log <<'EOF'
+[2024-06-01 10:05:21] ERROR: File not found: /about.html
+[2024-06-01 10:06:30] ERROR: Database connection failed
+[2024-06-01 10:07:42] ERROR: File not found: /about.html
+[2024-06-01 10:10:01] ERROR: Invalid user input
+[2024-06-01 10:11:09] ERROR: Database connection failed
+[2024-06-01 10:13:42] ERROR: Server timeout
+EOF
+
+    # Ensure permissions: all files and directories owned by non-root user
+    chmod 755 /home/user
+    chmod 755 /home/user/devserver
+    chmod 644 /home/user/devserver/error.log
+
+    # Install pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+%labels
+    Maintainer example@example.com
+    Description Apptainer container for unique error message extraction task

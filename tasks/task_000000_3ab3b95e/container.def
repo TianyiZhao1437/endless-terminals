@@ -1,0 +1,22 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    apt-get update
+    apt-get install -y python3-pip iputils-ping dnsutils traceroute iproute2 netcat
+    pip3 install pytest
+
+    # Create the user home directory if it doesn't exist, and set appropriate permissions
+    mkdir -p /home/user
+    chown -R 1000:1000 /home/user
+    chmod 755 /home/user
+
+%files
+
+%environment
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+
+%labels
+    Author network-diagnostics-task
+    Description "Container for network diagnostics investigation task: pytest installed, /home/user ready, no output log present."

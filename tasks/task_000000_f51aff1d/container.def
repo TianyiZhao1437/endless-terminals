@@ -1,0 +1,28 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+    # Create user 'user' with home directory
+    useradd -m -d /home/user user
+
+    # Create logs directory
+    mkdir -p /home/user/logs
+    chown user:user /home/user/logs
+    chmod 755 /home/user/logs
+
+    # Create sample uptime.log with historical data
+    cat > /home/user/logs/uptime.log <<EOF
+2024-06-10 10:00:01 - uptime: up 2 hours, 12 minutes
+2024-06-10 12:30:01 - uptime: up 4 hours, 42 minutes
+EOF
+    chown user:user /home/user/logs/uptime.log
+    chmod 644 /home/user/logs/uptime.log
+
+    # Install python3, pip, and pytest
+    apt-get update
+    apt-get install -y python3 python3-pip
+    pip3 install pytest
+
+%environment
+    export PATH=/usr/local/bin:/usr/bin:/bin:$PATH

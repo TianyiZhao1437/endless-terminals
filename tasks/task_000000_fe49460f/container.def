@@ -1,0 +1,29 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+    apt-get update
+    # Install lynx and w3m for text-based browsing, plus curl for fallback
+    apt-get install -y lynx w3m curl python3-pip
+    # Install pytest for testing
+    pip3 install --no-cache-dir pytest
+    # Create user (if not already present) and set permissions
+    if ! id user >/dev/null 2>&1; then
+        useradd -m -s /bin/bash user
+    fi
+    chown -R user:user /home/user
+    # Ensure /home/user is writable by user
+    chmod 755 /home/user
+
+%environment
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+    export PATH=/home/user/.local/bin:$PATH
+
+%labels
+    Author="Apptainer Expert"
+    Description="Container for ETL text extraction from https://example.com using text-based browsers. pytest installed."
+
+%runscript
+    exec /bin/bash

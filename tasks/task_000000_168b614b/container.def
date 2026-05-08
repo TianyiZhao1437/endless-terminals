@@ -1,0 +1,64 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+
+    apt-get update
+    apt-get install -y python3 python3-pip
+
+    pip3 install --no-cache-dir pytest
+
+    # Create experiment project directory structure
+    mkdir -p /home/user/ml_projects/experiment_v1/artifacts
+
+    # Create a minimal run_experiment.py script that overwrites the artifacts
+    cat << 'EOF' > /home/user/ml_projects/experiment_v1/run_experiment.py
+import os
+import json
+
+artifacts_dir = os.path.join(os.path.dirname(__file__), 'artifacts')
+os.makedirs(artifacts_dir, exist_ok=True)
+
+metrics = {"accuracy": 0.962, "loss": 0.128}
+metrics_path = os.path.join(artifacts_dir, "metrics.json")
+with open(metrics_path, "w") as f:
+    json.dump(metrics, f, indent=2)
+
+model_path = os.path.join(artifacts_dir, "model.pkl")
+with open(model_path, "wb") as f:
+    f.write(b"\x80\x04modelpickle")  # dummy non-empty binary
+
+output_log_path = os.path.join(artifacts_dir, "output.log")
+with open(output_log_path, "w") as f:
+    f.write("Experiment completed successfully.\n")
+EOF
+
+    # Create initial artifact files with correct content
+    cat << EOF > /home/user/ml_projects/experiment_v1/artifacts/metrics.json
+{
+  "accuracy": 0.962,
+  "loss": 0.128
+}
+EOF
+
+    # Model binary: non-empty
+    printf '\x80\x04modelpickle' > /home/user/ml_projects/experiment_v1/artifacts/model.pkl
+
+    # output.log
+    echo "Experiment completed successfully." > /home/user/ml_projects/experiment_v1/artifacts/output.log
+
+    # Set permissions: user read/write for all files
+    chmod 755 /home/user/ml_projects
+    chmod 755 /home/user/ml_projects/experiment_v1
+    chmod 755 /home/user/ml_projects/experiment_v1/artifacts
+    chmod 644 /home/user/ml_projects/experiment_v1/run_experiment.py
+    chmod 644 /home/user/ml_projects/experiment_v1/artifacts/metrics.json
+    chmod 644 /home/user/ml_projects/experiment_v1/artifacts/model.pkl
+    chmod 644 /home/user/ml_projects/experiment_v1/artifacts/output.log
+
+    chown -R 1000:1000 /home/user/ml_projects
+
+%labels
+    Author mlops-task-bot
+    Description "Container for ML experiment artifact verification task. Contains experiment script and initial artifacts."

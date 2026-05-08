@@ -1,0 +1,28 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+
+    # Install Python3, pip, and pytest
+    apt-get update
+    apt-get install -y python3 python3-pip
+    pip3 install --no-cache-dir --upgrade pip
+    pip3 install --no-cache-dir pytest
+
+    # Create user and home directory if not already present
+    if ! id user >/dev/null 2>&1; then
+        useradd -m -s /bin/bash user
+    fi
+
+    # Ensure /home/user/etl_env exists and is writable by user
+    mkdir -p /home/user/etl_env
+    chown user:user /home/user/etl_env
+    chmod 755 /home/user/etl_env
+
+%labels
+    Author YourName
+    Description "ETL pipeline preparation environment with pytest and writable etl_env directory"
+
+%runscript
+    exec /bin/bash

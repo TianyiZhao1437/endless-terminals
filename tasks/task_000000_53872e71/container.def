@@ -1,0 +1,36 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+    # Create user, home and ci_cd directory
+    useradd -m user
+    mkdir -p /home/user/ci_cd
+    chown -R user:user /home/user
+
+    # Create the config.ini file with the expected contents
+    cat > /home/user/ci_cd/config.ini <<EOF
+[general]
+env=staging
+build_number=615
+
+[deployment]
+strategy=blue-green
+timeout=300
+rollback=true
+
+[notifications]
+slack_channel=devops-alerts
+EOF
+
+    # Ensure permissions
+    chown user:user /home/user/ci_cd/config.ini
+    chmod 644 /home/user/ci_cd/config.ini
+
+%labels
+    Author="Apptainer/Singularity Expert"
+    Description="Container with initial state for CI/CD config INI parsing task and pytest installed."

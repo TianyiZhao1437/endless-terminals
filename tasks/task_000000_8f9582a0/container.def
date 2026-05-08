@@ -1,0 +1,36 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    # Create user and home directory
+    useradd -m -d /home/user user
+
+    # Install python3-pip (for pytest) and tar (for archive creation)
+    apt-get update
+    apt-get install -y python3-pip tar
+
+    # Install pytest
+    pip3 install pytest
+
+    # Set up backup_data directory and create sample_backup.tar.gz with required contents
+    mkdir -p /home/user/backup_data
+    mkdir -p /tmp/project_docs
+    echo "This is a README for the project." > /tmp/project_docs/README.txt
+    echo "Follow these steps to restore your files." > /tmp/project_docs/instructions.txt
+
+    # Create the tar.gz archive
+    tar -czf /home/user/backup_data/sample_backup.tar.gz -C /tmp project_docs
+
+    # Clean up temporary files
+    rm -rf /tmp/project_docs
+
+    # Set up restore_test directory, ensure it's empty
+    mkdir -p /home/user/restore_test
+    rm -rf /home/user/restore_test/*
+
+    # Set permissions so agent (running as user) can access everything
+    chown -R user:user /home/user/backup_data
+    chown -R user:user /home/user/restore_test
+
+%environment
+    export PATH=/usr/local/bin:/usr/bin:/bin:$PATH

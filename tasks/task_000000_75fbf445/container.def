@@ -1,0 +1,33 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create user and home directory
+    groupadd -g 1000 user
+    useradd -m -u 1000 -g 1000 user
+
+    # Install Python3 and pip (for pytest)
+    apt-get update
+    apt-get install -y python3 python3-pip
+
+    # Install pytest for agent testing
+    pip3 install --no-cache-dir pytest
+
+    # Create /home/user/cleanup.sh with executable permissions and some content
+    echo '#!/bin/bash\necho "cleanup"' > /home/user/cleanup.sh
+    chmod 755 /home/user/cleanup.sh
+    chown user:user /home/user/cleanup.sh
+
+%labels
+    Author agent
+
+%files
+
+%environment
+    export USER=user
+    export PATH=/home/user/.local/bin:$PATH
+
+%runscript
+    exec /bin/bash

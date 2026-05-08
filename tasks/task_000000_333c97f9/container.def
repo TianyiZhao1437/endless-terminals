@@ -1,0 +1,42 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+    # Create user and home directory
+    useradd -m -d /home/user user
+
+    # Create deployment_data directory with correct permissions
+    mkdir -p /home/user/deployment_data
+    chown user:user /home/user/deployment_data
+    chmod 755 /home/user/deployment_data
+
+    # Create and populate /home/user/deployment_data/service_updates.log
+    cat > /home/user/deployment_data/service_updates.log <<EOF
+webserver
+auth
+db
+webserver
+auth
+cache
+webserver
+auth
+EOF
+    chown user:user /home/user/deployment_data/service_updates.log
+    chmod 644 /home/user/deployment_data/service_updates.log
+
+    # Do NOT create /home/user/deployment_data/service_update_frequencies.log
+
+    # Install python3 and pip
+    apt-get update
+    apt-get install -y python3 python3-pip
+
+    # Install pytest
+    pip3 install --no-cache-dir pytest
+
+%files
+
+%environment
+    export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
+
+%setup

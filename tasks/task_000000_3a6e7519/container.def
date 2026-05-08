@@ -1,0 +1,20 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create user home directory with correct permissions
+    mkdir -p /home/user
+    chown 1000:1000 /home/user
+
+    # Install Python 3 (>=3.8) and pip (ensure compatibility for the task)
+    apt-get update
+    apt-get install -y python3 python3-pip
+
+    # Upgrade pip and install pytest (for testing)
+    python3 -m pip install --upgrade pip
+    python3 -m pip install pytest
+
+%environment
+    export PATH=/usr/bin:$PATH

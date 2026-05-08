@@ -1,0 +1,31 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create user and group if not present
+    groupadd -g 1000 user || true
+    useradd -m -u 1000 -g 1000 user || true
+
+    # Create the mlops directory
+    mkdir -p /home/user/mlops
+
+    # Create the artifact_service.conf file with the required initial content
+    echo "artifact_dir=/tmp/some/old/path" > /home/user/mlops/artifact_service.conf
+
+    # Set permissions so user can read/write
+    chown -R user:user /home/user/mlops
+    chmod 755 /home/user/mlops
+    chmod 644 /home/user/mlops/artifact_service.conf
+
+    # Install pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+%labels
+    Author MLOps
+
+%help
+    Container for MLOps artifact tracking task. Initial state is set up with config file and pytest installed.

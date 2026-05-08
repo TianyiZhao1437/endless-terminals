@@ -1,0 +1,40 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -eux
+
+    # Create user and home directory if not present
+    if ! id user >/dev/null 2>&1; then
+        useradd -m -s /bin/bash user
+    fi
+
+    # Ensure /home/user exists (useradd -m creates it, but double-check)
+    mkdir -p /home/user
+    chown user:user /home/user
+
+    # Create billing_reports directory
+    mkdir -p /home/user/billing_reports
+    chown user:user /home/user/billing_reports
+
+    # Create initial CSV files
+    echo "Date,Cost" > /home/user/billing_reports/cloud_may.csv
+    echo "2023-05-01,100" >> /home/user/billing_reports/cloud_may.csv
+    echo "Date,Cost" > /home/user/billing_reports/cloud_june.csv
+    echo "2023-06-01,200" >> /home/user/billing_reports/cloud_june.csv
+
+    chown user:user /home/user/billing_reports/cloud_may.csv
+    chown user:user /home/user/billing_reports/cloud_june.csv
+
+    # Ensure permissions are correct
+    chmod 700 /home/user/billing_reports
+    chmod 600 /home/user/billing_reports/cloud_may.csv
+    chmod 600 /home/user/billing_reports/cloud_june.csv
+
+    # Install pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+%environment
+    export PATH=/home/user/.local/bin:$PATH

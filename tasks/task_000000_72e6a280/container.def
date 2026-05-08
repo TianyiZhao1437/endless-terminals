@@ -1,0 +1,47 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create user and home directory
+    useradd -m -d /home/user user || true
+    mkdir -p /home/user/network_utils
+    chown -R user:user /home/user/network_utils
+
+    # Create network_check.sh with correct contents and permissions
+    echo '#!/bin/bash
+ping -c 4 8.8.8.8' > /home/user/network_utils/network_check.sh
+    chmod 755 /home/user/network_utils/network_check.sh
+    chown user:user /home/user/network_utils/network_check.sh
+
+    # Create VERSION file with initial version
+    echo '1.2.3' > /home/user/network_utils/VERSION
+    chmod 644 /home/user/network_utils/VERSION
+    chown user:user /home/user/network_utils/VERSION
+
+    # Create CHANGELOG.md with initial content
+    cat > /home/user/network_utils/CHANGELOG.md <<EOF
+## [1.2.3] - 2024-04-09
+### Fixed
+- Handle unreachable hosts error.
+
+## [1.2.2] - 2024-02-27
+### Added
+- Verbose mode for debug output.
+EOF
+    chmod 644 /home/user/network_utils/CHANGELOG.md
+    chown user:user /home/user/network_utils/CHANGELOG.md
+
+    # Install Python3 and pip
+    apt-get update
+    apt-get install -y python3 python3-pip
+
+    # Install pytest
+    pip3 install pytest
+
+%environment
+    export PATH=/home/user/network_utils:$PATH
+
+%runscript
+    echo "Container is ready. The initial state for the task is set."

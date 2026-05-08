@@ -1,0 +1,34 @@
+Bootstrap: localimage
+From: ./ubuntu_22.04.sif
+
+%post
+    set -e
+
+    # Create the user home directory if it doesn't exist
+    mkdir -p /home/user
+
+    # Create the repos directory and set permissions so it's writable by user (UID 1000)
+    mkdir -p /home/user/repos
+    chown 1000:1000 /home/user/repos
+    chmod 700 /home/user/repos
+
+    # Create the binary_versions.txt file with the exact contents
+    cat > /home/user/repos/binary_versions.txt <<EOF
+AlphaRepo 1.0.0
+betaRepo 2.3.1
+GammaRepo 0.9.6
+deltaRepo 3.2.0
+BetaRepo 2.2.2
+EOF
+
+    # Set ownership and permissions for the file
+    chown 1000:1000 /home/user/repos/binary_versions.txt
+    chmod 600 /home/user/repos/binary_versions.txt
+
+    # Install pip and pytest
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install --no-cache-dir pytest
+
+%environment
+    export PATH=/usr/local/bin:/usr/bin:/bin:$PATH
