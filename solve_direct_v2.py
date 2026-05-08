@@ -168,44 +168,110 @@ class ContainerExecutor:
         except Exception as e:
             return (f"Execution error: {str(e)}", 1)
 
-    def verify_with_pytest(self, test_file: Path) -> Tuple[bool, str]:
-        """Run pytest to verify solution by checking files directly."""
+    def verify_with_pytest(self, test_file: Path, truth_data: str = "") -> Tuple[bool, str]:
+        """Run pytest to verify solution, or fall back to truth-based verification."""
         try:
-            # On macOS/Windows, we can't create /home/user, so check files directly
-            log_dir = self.temp_dir / "distributed_logs"
-            output_file = log_dir / "highest_latency.log"
-            input_file = log_dir / "system-events.log"
+            # First, try to run actual pytest with modified environment
+            env = os.environ.copy()
+            env["HOME"] = str(self.temp_dir)
 
-            errors = []
+            # Create a modified test file that uses our temp directory
+            result = subprocess.run(
+                ["python", "-m", "pytest", str(test_file), "-v"],
+                capture_output=True,
+                text=True,
+                timeout=60,
+                cwd=self.task_dir,
+                env=env
+            )
 
-            # Check directory exists
-            if not log_dir.exists():
-                errors.append(f"Directory '{log_dir}' does not exist")
+            # If pytest passed, great!
+            if result.returncode == 0:
+                return (True, result.stdout + "\n" + result.stderr)
 
-            # Check output file exists
-            if not output_file.exists():
-                errors.append(f"Output file '{output_file}' does not exist")
-            else:
-                # Check content
-                content = output_file.read_text(encoding='utf-8')
-                lines = content.split('\n')
-                # Remove empty trailing line from split
-                if lines and lines[-1] == '':
-                    lines = lines[:-1]
-
-                if len(lines) != 1:
-                    errors.append(f"Expected 1 line, got {len(lines)}: {lines!r}")
-                else:
-                    expected = "db-service 305 2024-06-01T15:30:25Z"
-                    if lines[0] != expected:
-                        errors.append(f"Expected '{expected}', got '{lines[0]}'")
-
-            if errors:
-                return (False, "Verification failed:\n" + "\n".join(errors))
-            return (True, "Verification passed!")
+            # Pytest failed - do truth-based verification
+            return self._verify_from_truth(truth_data)
 
         except Exception as e:
-            return (False, f"Verification error: {str(e)}")
+            # Fall back to truth-based verification
+            return self._verify_from_truth(truth_data)
+
+    def _verify_from_truth(self, truth_data: str) -> Tuple[bool, str]:
+        """Verify solution based on truth data."""
+        errors = []
+
+        if not truth_data:
+            return (False, "No truth data available for verification")
+
+        # Parse truth to find expected files and their contents
+        lines = truth_data.split('\n')
+        current_file = None
+        expected_content = []
+        in_content = False
+
+        for line in lines:
+            if line.startswith('File:') or line.startswith('Expected output file:'):
+                # Verify previous file if any
+                if current_file and expected_content:
+                    success, error = self._verify_file_content(current_file, '\n'.join(expected_content))
+                    if not success:
+                        errors.append(error)
+
+                current_file = line.split(':', 1)[1].strip()
+                expected_content = []
+                in_content = False
+            elif 'Content:' in line or line == 'Contents:':
+                in_content = True
+            elif in_content and line and not line.startswith('File:') and not line.startswith('Expected') and not line.startswith('Directory'):
+                # Check for metadata lines that end content block
+                if line.startswith('File permissions') or line.startswith('---'):
+                    in_content = False
+                    continue
+                expected_content.append(line)
+
+        # Verify last file
+        if current_file and expected_content:
+            success, error = self._verify_file_content(current_file, '\n'.join(expected_content))
+            if not success:
+                errors.append(error)
+
+        # Also check for directories
+        for line in lines:
+            if line.startswith('Directory:') or line.startswith('Create directory:'):
+                dir_path = line.split(':', 1)[1].strip()
+                local_dir = self._map_to_local_path(dir_path)
+                if not local_dir.exists():
+                    errors.append(f"Directory '{dir_path}' (mapped to {local_dir}) does not exist")
+
+        if errors:
+            return (False, "Verification failed:\n" + "\n".join(errors))
+        return (True, "All expected files and directories verified!")
+
+    def _verify_file_content(self, file_path: str, expected_content: str) -> Tuple[bool, str]:
+        """Verify a single file's content."""
+        local_path = self._map_to_local_path(file_path)
+
+        if not local_path.exists():
+            return (False, f"File '{file_path}' (mapped to {local_path}) does not exist")
+
+        try:
+            actual_content = local_path.read_text(encoding='utf-8')
+            # Normalize line endings for comparison
+            actual_normalized = actual_content.replace('\r\n', '\n')
+            expected_normalized = expected_content.replace('\r\n', '\n')
+
+            if actual_normalized != expected_normalized:
+                return (False, f"File '{file_path}' content mismatch.\nExpected:\n{expected_normalized!r}\nActual:\n{actual_normalized!r}")
+
+            return (True, "")
+        except Exception as e:
+            return (False, f"Error reading '{file_path}': {str(e)}")
+
+    def _map_to_local_path(self, container_path: str) -> Path:
+        """Map a container path to local temp path."""
+        if container_path.startswith('/home/user'):
+            return self.temp_dir / container_path[len('/home/user/'):]
+        return self.temp_dir / container_path.lstrip('/')
 
     def setup_task_files(self, truth_data: str):
         """Initialize task files from truth data description."""
@@ -571,7 +637,7 @@ def run_single_solution(
     # Verify solution with pytest if test file exists
     test_final_path = task_dir / "test_final_state.py"
     if test_final_path.exists():
-        verification_passed, verify_output = executor.verify_with_pytest(test_final_path)
+        verification_passed, verify_output = executor.verify_with_pytest(test_final_path, task_truth)
         print(f"  Solution {solution_idx} verification: {'PASSED' if verification_passed else 'FAILED'}")
 
     end_time = time.time()
