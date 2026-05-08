@@ -29,6 +29,7 @@ from generator.sample_solutions import SYSTEM_MESSAGE, USER_TEMPLATE, _extract_a
 
 MAX_OUTPUT_LENGTH = 50000
 MAX_EPISODES = 64
+MIN_EPISODES = 8  # Minimum interaction rounds before allowing task completion
 MAX_TIME_SEC = 600
 
 # Agent system prompt for solving terminal tasks
@@ -66,6 +67,8 @@ CRITICAL RULES:
 - You can send multiple commands in one response
 
 5. When finished, set "task_complete": true in your response.
+
+6. MINIMUM INTERACTION ROUNDS: You MUST complete at least 8 interaction rounds (episodes) before marking the task as complete. Even if you think you're done early, continue to explore, verify with multiple commands, and refine your solution until reaching the minimum round count.
 """.strip()
 
 
@@ -515,6 +518,38 @@ def run_single_solution(
             episode_id += 1
 
             if parsed.get("task_complete", False):
+                # Enforce minimum episode count
+                if episode < MIN_EPISODES:
+                    # Force agent to continue exploring
+                    min_episode_msg = f"You have only completed {episode} interaction rounds. Please continue exploring and verifying your solution. You must complete at least {MIN_EPISODES} rounds before marking the task as done. Consider: 1) Re-reading the task requirements, 2) Double-checking your solution with additional verification commands, 3) Testing edge cases."
+
+                    steps.append({
+                        "step_id": episode_id,
+                        "timestamp": format_timestamp(),
+                        "source": "agent",
+                        "model_name": model,
+                        "message": parsed.get("analysis", "Task complete (blocked - min episodes not met)"),
+                        "metrics": {
+                            "prompt_tokens": debug_info["prompt_tokens"],
+                            "completion_tokens": debug_info["completion_tokens"],
+                        }
+                    })
+
+                    # Update chat to force continuation
+                    chat.append({"role": "assistant", "content": raw_content})
+                    chat.append({"role": "user", "content": min_episode_msg})
+
+                    # Add system step
+                    episode_id += 1
+                    steps.append({
+                        "step_id": episode_id,
+                        "timestamp": format_timestamp(),
+                        "source": "system",
+                        "message": min_episode_msg,
+                    })
+                    continue  # Skip to next episode, don't break
+
+                # Minimum episodes met, allow completion
                 steps.append({
                     "step_id": episode_id,
                     "timestamp": format_timestamp(),
