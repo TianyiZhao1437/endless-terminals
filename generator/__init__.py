@@ -53,7 +53,7 @@ def chat_completion_batch(
     # OpenAI-compatible API client
     client = OpenAI(
         base_url="https://api.commonstack.ai/v1",
-        api_key="ak-678757985e617821506d407ab5b8ead02d64e6cce0bbc1fdbe29ff167c2ba819"
+        api_key="my_key"
     )
     clients = {
         model : client
